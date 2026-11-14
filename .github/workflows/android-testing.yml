@@ -1,0 +1,69 @@
+name: KLIK Android testing APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: klik-android-testing
+  cancel-in-progress: false
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      FLUTTER_SUPPRESS_ANALYTICS: 'true'
+      FLUTTER_VERSION: '3.50.0'
+    steps:
+      - name: Checkout private source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install official Flutter SDK
+        shell: bash
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
+          if [ -n "${JAVA_HOME_21_X64:-}" ]; then
+            echo "JAVA_HOME=$JAVA_HOME_21_X64" >> "$GITHUB_ENV"
+            echo "$JAVA_HOME_21_X64/bin" >> "$GITHUB_PATH"
+          fi
+      - name: Prepare Android SDK
+        shell: bash
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0" "ndk;28.2.13676358"
+          flutter config --android-sdk "$ANDROID_HOME"
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Analyze source
+        run: flutter analyze
+      - name: Check business rules and persistence
+        run: dart tool/check_rules.dart
+      - name: Test widgets and capture screens
+        shell: bash
+        run: |
+          mkdir -p build/review
+          set -o pipefail
+          flutter test --reporter expanded 2>&1 | tee build/review/flutter-tests.log
+      - name: Build Android testing APK
+        run: flutter build apk --debug --no-pub
+      - name: Upload APK
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: KLIK-Android-Testing-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+      - name: Upload visual review and test log
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: KLIK-UI-Review-${{ github.run_number }}
+          path: build/review/
+          if-no-files-found: warn
+          retention-days: 7
