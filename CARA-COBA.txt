@@ -1,13 +1,20 @@
-CARA MENCOBA KLIK DI HP ANDROID
+CARA MEMASANG KLIK 0.4.1 DI HP ANDROID
 
-1. Ambil file KLIK-Flutter-Testing.apk yang berada di folder proyek ini.
-2. Pindahkan file APK tersebut ke HP Android menggunakan kabel USB atau layanan pengiriman file pilihanmu.
-3. Pada HP, buka file APK melalui aplikasi Files/File Manager, lalu pilih Instal.
-4. Jika Android meminta izin memasang dari aplikasi pengelola file itu, berikan izin untuk pemasangan APK ini.
-5. Buka aplikasi KLIK, lalu pilih Coba tanpa akun.
+APK terbaru: KLIK-0.4.1-Testing.apk
 
-Yang bisa dicoba: tema terang/gelap, pencarian, detail kegiatan, gabung/keluar kegiatan, membuat ruang/acara, mengubah profil dan pilihan komunitas lokal. Hasil pertandingan milikmu dapat diajukan setelah jadwalnya selesai; hasil tetap menunggu konfirmasi.
+Versi sebelumnya memakai kunci APK sementara, sehingga Android dapat menolak pembaruan langsung. Untuk mengganti versi lama pada percobaan ini:
+1. Pastikan data percobaan lama memang boleh dihapus. Data lokal ikut terhapus ketika aplikasi dicopot.
+2. Di HP, tekan lama ikon KLIK, lalu pilih Uninstall/Copot pemasangan.
+3. Pindahkan KLIK-0.4.1-Testing.apk dari folder LOMBA/KLIK-Flutter ke HP.
+4. Buka APK melalui Files/File Manager, lalu pilih Instal.
+5. Jika Android meminta izin memasang dari pengelola file tersebut, berikan izin untuk pemasangan APK ini.
+6. Buka KLIK, lalu pilih Coba tanpa akun.
 
-Versi ini untuk percobaan lokal. Data tersimpan di perangkat ini, belum terhubung ke pengguna lain. Login online belum aktif karena proyek Supabase belum tersedia. Data dapat hilang jika data aplikasi dihapus atau aplikasi dicopot.
+Coba kembali:
+- Buat event dengan judul pendek dan panjang, lalu lihat kartu event di Beranda. Tinggi kartu harus sama.
+- Buka Ruang Terdekat. Label Kasual/Berperingkat dan tombol Gabung berada di sisi kanan kartu.
+- Ganti tema terang/gelap dan coba ukuran tulisan besar.
 
-Kode sumber berada di folder lib. Buka folder KLIK-Flutter melalui File > Open Folder di VS Code. Rincian pengembangan dan hasil pemeriksaan tersedia di README.md dan VALIDATION.md.
+Data tersimpan di HP ini. Akun online dan data bersama belum aktif karena proyek Supabase belum tersedia.
+
+Kode sumber berada di folder lib. Untuk mengedit, buka folder KLIK-Flutter melalui File > Open Folder di VS Code. Catatan perubahan ada di CHANGES-0.4.1.md; hasil pemeriksaan ada di VALIDATION.md.

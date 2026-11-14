@@ -1,4 +1,4 @@
-# KLIK Mobile — versi uji coba 0.4.0
+# KLIK Mobile — versi uji coba 0.4.1
 
 ## A. Tujuan dan fitur
 
@@ -83,7 +83,7 @@ Unduh artefak APK dari run yang **berhasil**, ekstrak ZIP, lalu pindahkan APK ke
 
 ## H. Pengujian dan kecocokan Figma
 
-Status aktual ada di VALIDATION.md. Analisis kode, 47 pemeriksaan aturan/penyimpanan dan 9 tes konfigurasi/widget/layar telah lulus di GitHub. Pengujian lokal Windows terhalang Application Control; pemeriksaan runtime dilanjutkan di GitHub dengan izin pengguna. Status APK dan pemeriksaan gambar terbaru dicatat di VALIDATION.md.
+Status aktual ada di VALIDATION.md. Analisis kode, 47 pemeriksaan aturan/penyimpanan dan 12 tes konfigurasi/widget/layar telah lulus di GitHub. Pengujian lokal Windows terhalang Application Control; pemeriksaan runtime dilanjutkan di GitHub dengan izin pengguna. Status APK dan pemeriksaan gambar terbaru dicatat di VALIDATION.md.
 
 Beranda dibandingkan dengan konteks Figma yang berhasil dibaca, memakai aset aslinya. Pembacaan layar Figma lain terhenti karena batas penggunaan layanan; sumber Figma yang sudah tersimpan digunakan sebagai referensi tambahan. Seluruh layar belum dapat dinyatakan sama persis dan seluruh bug belum dapat dinyatakan selesai.
 
@@ -100,5 +100,6 @@ Setelah build tersedia, periksa seluruh tab, pencarian, buat/gabung/keluar ruang
 | Login belum aktif | Proyek Supabase dan konfigurasi publik belum tersedia; gunakan Coba tanpa akun. |
 | Data tidak muncul di HP lain | Penyimpanan saat ini lokal, belum tersinkron ke server. |
 | Paket APK belum terlihat | Periksa hasil build; sumber ZIP bukan APK yang dapat dipasang. |
+
 
 

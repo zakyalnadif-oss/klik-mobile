@@ -1,31 +1,29 @@
-# Hasil pemeriksaan — 14 November 2026
+# Hasil pemeriksaan KLIK 0.4.1 — 14 November 2026
 
-Versi sumber 0.4.0+4. Lokal: Windows, Flutter 3.50.0, Dart 3.14.0, JDK 21. Pemeriksaan runtime: GitHub Actions Ubuntu 24.04, Flutter 3.50.0, JDK 21.
+Versi sumber: 0.4.1+5. Lingkungan CI: Ubuntu 24.04, Flutter 3.50.0, Dart 3.14.0, JDK 21.
 
 Repositori privat: https://github.com/zakyalnadif-oss/klik-mobile
-Revisi yang diperiksa: e3ee3756e2536b561427cfdfff592898d6dfd26c
-Run: https://github.com/zakyalnadif-oss/klik-mobile/actions/runs/43575754086
+Revisi aplikasi: 2a550386ad649997225895b672cc3c447a34b26a
+Run berhasil: https://github.com/zakyalnadif-oss/klik-mobile/actions/runs/43585809249
 
-| Pemeriksaan | Hasil aktual |
+| Pemeriksaan | Hasil |
 | --- | --- |
-| Resolusi paket | Berhasil; versi dikunci dalam pubspec.lock. |
-| Analisis kode | Lulus lokal dan GitHub: No issues found. |
-| Aturan bisnis dan penyimpanan | 47 pemeriksaan lulus lokal dan GitHub. |
-| Tes konfigurasi/widget/layar | 9 tes lulus di GitHub, termasuk lima tab, pencarian sekunder, tema, teks 200% pada layar kecil, kegagalan penyimpanan dan penangkapan layar rute utama. |
-| Regresi yang ditemukan | Menu bawah terpotong 2 px saat tulisan besar; tinggi menu diperbaiki dan tes ulang lulus. Ikon lokasi/chevron mengikuti tema. Gaya tulisan pilihan memakai Inter dan warna eksplisit. Lokasi Beranda berpindah ke baris lebar pada layar kecil/teks besar. Kategori pencarian mengikuti perubahan parameter navigasi; tes memverifikasi kategori Acara dan skor 5–3 benar-benar tersimpan. |
-| Pemeriksaan visual | 59 gambar berhasil dihasilkan. Gambar utama terang/gelap serta perubahan Beranda, kategori Acara dan hasil skor ditinjau. Penangkapan meliputi 22 rute terang/gelap, input/hasil skor dan 11 tampilan kecil dengan teks besar. |
-| Build APK lokal | Gagal karena Application Control memblokir Android CLI (os error 4551). Tidak menonaktifkan perlindungan Windows. |
-| Build APK GitHub | Berhasil. APK diunduh dan diperiksa: delapan entri/aset wajib tersedia; apksigner menyatakan Verifies, APK Signature Scheme v2 valid. APK debug untuk percobaan. |
-| Supabase Auth/database/RLS/Storage | Belum terhubung atau diuji; pengguna belum memiliki proyek Supabase. |
-| Perangkat Android nyata | Belum diuji pada versi Flutter ini. |
-| iOS | Belum dibangun atau diuji; memerlukan macOS/Xcode/signing. |
+| Analisis kode | Lulus, No issues found. |
+| Aturan dan penyimpanan lokal | 47 pemeriksaan lulus: validasi, kapasitas, gabung/keluar berulang, kepemilikan, waktu kegiatan, skor, UTC, antrean penulisan dan rollback. |
+| Konfigurasi dan widget | 12 tes lulus. Tiga tes baru menguji ukuran kartu event, kesamaan garis bawah tombol, perataan tombol/label ruang dan tampilan 320 x 568 dengan teks 200%. |
+| Tangkapan layar | 59 gambar dihasilkan: 22 rute terang/gelap, Beranda bagian bawah, input/hasil skor dan 11 tampilan kecil dengan teks besar. Gambar utama diperiksa, termasuk perataan label/tombol, kategori Acara dan hasil 5–3 yang tersimpan. |
+| Kartu event | Kartu dengan judul pendek/panjang memiliki ukuran sama dan tombol sejajar. Tinggi mengikuti isi terpanjang; isi tidak dipotong untuk menyamakan ukuran. |
+| Kartu ruang | Tombol Gabung dan label Kasual/Berperingkat berada pada sisi kanan yang sama; jarak ke tepi kartu diperiksa otomatis. |
+| APK Android | Build berhasil dan berkas diunduh. Delapan entri/aset wajib tersedia. |
+| Metadata APK | aapt2: id.klik.klik_mobile, versionName 0.4.1, versionCode 5, minSdk 24, targetSdk 36, label KLIK. |
+| Tanda tangan | apksigner: Verifies; APK Signature Scheme v2 valid, RSA 2048-bit, sertifikat debug sementara. |
+| HP Android pengguna | Belum diuji langsung setelah perbaikan ini; perlu dicoba pada perangkat pengguna. |
+| Supabase/server/RLS/multi-pengguna | Belum terhubung atau diuji; proyek Supabase belum tersedia. Data uji coba lokal. |
 
-Pemeriksaan aturan mencakup validasi, kapasitas, gabung/keluar berulang, waktu kegiatan, pemilik, skor menunggu konfirmasi, serialisasi UTC, penulisan bersamaan, rollback dan pemulihan setelah kegagalan penyimpanan.
+APK: KLIK-0.4.1-Testing.apk
+Ukuran: 172057572 byte
+SHA-256: 3848e61685ae8727b0734639c2a7b8ac5a04f5951f16a4c550a4b9a35ab3684f
 
-Referensi Figma: konteks Beranda 76:402 berhasil dibaca; pembacaan layar berikutnya terhenti oleh kuota layanan. Aset asli disimpan lokal. Kecocokan penuh seluruh prototipe belum terverifikasi. Tes lulus bukan jaminan tidak ada bug pada seluruh perangkat atau seluruh alur.
+Sertifikat debug berbeda dari APK 0.4.0 sebelumnya. Untuk mengganti versi lama dengan APK ini, aplikasi lama perlu dicopot; data lokalnya ikut dihapus. Pengguna telah memilih penggantian versi lama dan menyetujui reset data percobaan. Petunjuk tersedia di CARA-COBA.txt.
 
-Data contoh/peringkat contoh dilabeli. Fitur sosial dan kegiatan saat ini lokal, tidak melakukan transaksi atau sinkronisasi antarpengguna. Penambahan URL/key Supabase saja belum mengaktifkan database kegiatan.
-
-APK: KLIK-Flutter-Testing.apk; 172055140 byte.
-SHA-256: bdc356d289f37cde22094d9f9e9ceb2ebe6c577a85cddf344ff0a18510e1a927
-
+Tes yang lulus tidak menjamin seluruh bug di semua perangkat atau seluruh alur telah ditemukan. Kecocokan penuh seluruh prototipe Figma belum terverifikasi karena pembacaan Figma sebelumnya dibatasi kuota. Referensi perbaikan ini adalah tangkapan layar pengguna dan kode aplikasi saat ini.
