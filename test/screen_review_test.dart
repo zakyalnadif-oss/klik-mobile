@@ -116,6 +116,13 @@ void main() {
       for (final entry in routes.entries) {
         router.go(entry.value);
         await capture('${entry.key}-${theme.name}');
+        if (entry.key == 'events') {
+          final chip = tester.widget<ChoiceChip>(
+            find.widgetWithText(ChoiceChip, 'Acara'),
+          );
+          expect(chip.selected, isTrue);
+          expect(find.text('Futsal Cilandak Cup'), findsOneWidget);
+        }
         if (entry.key == 'home') {
           await tester.drag(
             find.byType(ListView).first,
@@ -163,7 +170,15 @@ void main() {
     );
     await tester.tap(find.text('Kirim hasil'));
     await tester.pumpAndSettle();
+    expect(repository.record['results'][ended.id]['own'], 5);
+    expect(repository.record['results'][ended.id]['other'], 3);
+    expect(
+      repository.record['results'][ended.id]['status'],
+      'Menunggu konfirmasi',
+    );
     router.go('/activity/${ended.id}');
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView).first, const Offset(0, -1600));
     await capture('pending-result-dark');
     tester.view.physicalSize = const Size(320, 568);
     tester.platformDispatcher.textScaleFactorTestValue = 2;

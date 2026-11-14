@@ -27,6 +27,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   @override
+  void didUpdateWidget(covariant SearchScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialTab != widget.initialTab) {
+      tab = ['Ruang', 'Rekan', 'Lapangan', 'Acara'].contains(widget.initialTab)
+          ? widget.initialTab
+          : 'Ruang';
+    }
+  }
+
+  @override
   void dispose() {
     search.dispose();
     super.dispose();
