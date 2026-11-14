@@ -17,7 +17,7 @@ const sportIcons = [
 const accent = Color(0xFFFF8D28);
 double navigationHeight(BuildContext context) {
   final width = (MediaQuery.sizeOf(context).width - 44) / 5;
-  double height = 20;
+  double height = 0;
   for (final label in ['Beranda', 'Sosial', 'Buat', 'Tanding', 'Profil']) {
     final painter = TextPainter(
       text: TextSpan(
@@ -30,7 +30,8 @@ double navigationHeight(BuildContext context) {
     if (painter.height > height) height = painter.height;
     painter.dispose();
   }
-  return height + 52;
+  final requiredHeight = height + 54;
+  return requiredHeight > 72 ? requiredHeight : 72;
 }
 
 double navigationBottomInset(BuildContext context) =>

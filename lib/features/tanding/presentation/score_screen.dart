@@ -115,7 +115,13 @@ class _ScoreScreenState extends ConsumerState<ScoreScreen> {
                           int.parse(own.text),
                           int.parse(other.text),
                         );
-                    if (context.mounted) context.pop();
+                    if (context.mounted) {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/activity/${widget.id}');
+                      }
+                    }
                   } catch (e) {
                     if (context.mounted) {
                       setState(() => busy = false);

@@ -95,6 +95,7 @@ class _PlayerTileState extends ConsumerState<PlayerTile> {
                 backgroundColor: accent,
                 child: Text(
                   p['initials'] as String,
+                  textScaler: TextScaler.noScaling,
                   style: textStyle(
                     15,
                     weight: FontWeight.w800,

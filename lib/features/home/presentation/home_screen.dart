@@ -145,7 +145,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         onTap: () => context.push('/edit-profile'),
                         child: Row(
                           children: [
-                            const FigmaIcon('location'),
+                            FigmaIcon(
+                              'location',
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                             const SizedBox(width: 5),
                             Expanded(
                               child: Text(
@@ -156,7 +159,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ).copyWith(height: 1.2),
                               ),
                             ),
-                            const FigmaIcon('chevron'),
+                            FigmaIcon(
+                              'chevron',
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ],
                         ),
                       ),

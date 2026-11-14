@@ -148,7 +148,14 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(0), '5');
     await tester.enterText(find.byType(TextFormField).at(1), '3');
     await tester.tap(find.byType(CheckboxListTile));
-    await tester.scrollUntilVisible(find.text('Kirim hasil'), 200);
+    await tester.scrollUntilVisible(
+      find.text('Kirim hasil'),
+      200,
+      scrollable: find.descendant(
+        of: find.byType(ListView).first,
+        matching: find.byType(Scrollable),
+      ).first,
+    );
     await tester.tap(find.text('Kirim hasil'));
     await tester.pumpAndSettle();
     router.go('/activity/${ended.id}');
