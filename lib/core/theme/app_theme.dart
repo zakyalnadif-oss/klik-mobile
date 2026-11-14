@@ -53,14 +53,16 @@ abstract final class AppTheme {
         selectedColor: DesignTokens.accent,
         backgroundColor: colors.surface,
         side: BorderSide.none,
-        labelStyle: WidgetStateTextStyle.resolveWith(
-          (states) => TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 13,
-            color: states.contains(WidgetState.selected)
-                ? const Color(0xFF171B12)
-                : colors.onSurface,
-          ),
+        checkmarkColor: const Color(0xFF171B12),
+        labelStyle: TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 13,
+          color: colors.onSurface,
+        ),
+        secondaryLabelStyle: const TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 13,
+          color: Color(0xFF171B12),
         ),
       ),
       scaffoldBackgroundColor: dark

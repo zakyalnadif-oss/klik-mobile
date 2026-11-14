@@ -34,6 +34,9 @@ void main() {
       final font = FontLoader('Inter')
         ..addFont(rootBundle.load('assets/fonts/Inter.ttf'));
       await font.load();
+      final icons = FontLoader('MaterialIcons')
+        ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
+      await icons.load();
       return LocalRepository().load();
     });
     final repository = MemoryRepository()
