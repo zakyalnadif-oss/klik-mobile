@@ -19,6 +19,22 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String sport = 'Futsal';
+  Widget locationLink(BuildContext context, String city) => InkWell(
+    onTap: () => context.push('/edit-profile'),
+    child: Row(
+      children: [
+        FigmaIcon('location', color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            city,
+            style: textStyle(13, weight: FontWeight.w600).copyWith(height: 1.2),
+          ),
+        ),
+        FigmaIcon('chevron', color: Theme.of(context).colorScheme.onSurface),
+      ],
+    ),
+  );
   Widget sportSelector(BuildContext context) => SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: Row(
@@ -107,6 +123,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final events = activities.where((a) => a.isEvent).toList(),
         rooms = activities.where((a) => !a.isEvent).toList();
     final joined = data['joined'] as List;
+    final expandedHeader =
+        MediaQuery.sizeOf(context).width < 360 ||
+        MediaQuery.textScalerOf(context).scale(13) > 18;
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -118,94 +137,80 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             navigationBottomInset(context),
           ),
           children: [
-            Row(
+            Column(
               children: [
-                ClipOval(
-                  child: Image.asset(
-                    'assets/figma/avatar.png',
-                    width: 44,
-                    height: 44,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'klik',
-                        style: textStyle(
-                          20,
-                          weight: FontWeight.w800,
-                        ).copyWith(height: 1.2),
+                Row(
+                  children: [
+                    ClipOval(
+                      child: Image.asset(
+                        'assets/figma/avatar.png',
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.cover,
                       ),
-                      const SizedBox(height: 5),
-                      InkWell(
-                        onTap: () => context.push('/edit-profile'),
-                        child: Row(
-                          children: [
-                            FigmaIcon(
-                              'location',
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 5),
-                            Expanded(
-                              child: Text(
-                                data['city'] as String,
-                                style: textStyle(
-                                  13,
-                                  weight: FontWeight.w600,
-                                ).copyWith(height: 1.2),
-                              ),
-                            ),
-                            FigmaIcon(
-                              'chevron',
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Tooltip(
-                  message: 'Ganti tema',
-                  child: InkResponse(
-                    onTap: () => perform(
-                      context,
-                      () => ref
-                          .read(themeModeProvider.notifier)
-                          .toggle(Theme.of(context).brightness),
                     ),
-                    child: Theme.of(context).brightness == Brightness.light
-                        ? const FigmaIcon('theme')
-                        : Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Theme.of(context).dividerColor,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.light_mode_outlined,
-                              size: 22,
-                            ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'klik',
+                            style: textStyle(
+                              20,
+                              weight: FontWeight.w800,
+                            ).copyWith(height: 1.2),
                           ),
-                  ),
+                          if (!expandedHeader) ...[
+                            const SizedBox(height: 5),
+                            locationLink(context, data['city'] as String),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Tooltip(
+                      message: 'Ganti tema',
+                      child: InkResponse(
+                        onTap: () => perform(
+                          context,
+                          () => ref
+                              .read(themeModeProvider.notifier)
+                              .toggle(Theme.of(context).brightness),
+                        ),
+                        child: Theme.of(context).brightness == Brightness.light
+                            ? const FigmaIcon('theme')
+                            : Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.light_mode_outlined,
+                                  size: 22,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Tooltip(
+                      message: 'Notifikasi',
+                      child: InkResponse(
+                        onTap: () => context.push('/notifications'),
+                        child: const FigmaIcon('notification'),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Tooltip(
-                  message: 'Notifikasi',
-                  child: InkResponse(
-                    onTap: () => context.push('/notifications'),
-                    child: const FigmaIcon('notification'),
-                  ),
-                ),
+                if (expandedHeader) ...[
+                  const SizedBox(height: 12),
+                  locationLink(context, data['city'] as String),
+                ],
               ],
             ),
             const SizedBox(height: 16),

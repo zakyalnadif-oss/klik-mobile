@@ -77,13 +77,13 @@ Hasil hanya tersedia jika build berhasil: `build/app/outputs/flutter-apk/app-deb
 
 ## G. Build melalui GitHub
 
-Workflow sudah disiapkan, tetapi keberadaan file workflow tidak berarti build sudah berjalan. Setelah kode diunggah ke repositori **privat** yang disetujui pengguna: buka Actions → KLIK Android testing APK → Run workflow. Workflow menjalankan analisis, pemeriksaan aturan, tes layar terang/gelap dan build APK. Artefak APK dan gambar pemeriksaan disimpan 7 hari. Pemakaian mengikuti kuota Actions akun GitHub.
+Repositori privat berada di https://github.com/zakyalnadif-oss/klik-mobile. Build sudah dijalankan; status aktual dicatat di VALIDATION.md. Untuk menjalankan ulang: buka Actions → KLIK Android testing APK → Run workflow. Workflow menjalankan analisis, pemeriksaan aturan, tes layar terang/gelap dan build APK. Artefak APK dan gambar pemeriksaan disimpan 7 hari. Pemakaian mengikuti kuota Actions akun GitHub.
 
 Unduh artefak APK dari run yang **berhasil**, ekstrak ZIP, lalu pindahkan APK ke HP Android. Izinkan pemasangan dari aplikasi pengelola file yang dipakai jika Android memintanya. APK proyek WebView lama merupakan versi berbeda; jangan menganggapnya hasil build Flutter terbaru.
 
 ## H. Pengujian dan kecocokan Figma
 
-Status aktual ada di VALIDATION.md. Analisis kode dan 47 pemeriksaan aturan/penyimpanan telah lulus. Tes widget serta gambar layar disiapkan tetapi belum berhasil dijalankan pada Windows karena Application Control memblokir alat Flutter/Android. Belum ada APK Flutter baru yang berhasil dibuat pada pemeriksaan lokal ini.
+Status aktual ada di VALIDATION.md. Analisis kode, 47 pemeriksaan aturan/penyimpanan dan 9 tes konfigurasi/widget/layar telah lulus di GitHub. Pengujian lokal Windows terhalang Application Control; pemeriksaan runtime dilanjutkan di GitHub dengan izin pengguna. Status APK dan pemeriksaan gambar terbaru dicatat di VALIDATION.md.
 
 Beranda dibandingkan dengan konteks Figma yang berhasil dibaca, memakai aset aslinya. Pembacaan layar Figma lain terhenti karena batas penggunaan layanan; sumber Figma yang sudah tersimpan digunakan sebagai referensi tambahan. Seluruh layar belum dapat dinyatakan sama persis dan seluruh bug belum dapat dinyatakan selesai.
 
@@ -100,4 +100,5 @@ Setelah build tersedia, periksa seluruh tab, pencarian, buat/gabung/keluar ruang
 | Login belum aktif | Proyek Supabase dan konfigurasi publik belum tersedia; gunakan Coba tanpa akun. |
 | Data tidak muncul di HP lain | Penyimpanan saat ini lokal, belum tersinkron ke server. |
 | Paket APK belum terlihat | Periksa hasil build; sumber ZIP bukan APK yang dapat dipasang. |
+
 

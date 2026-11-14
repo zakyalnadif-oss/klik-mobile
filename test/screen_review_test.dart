@@ -154,10 +154,12 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Kirim hasil'),
       200,
-      scrollable: find.descendant(
-        of: find.byType(ListView).first,
-        matching: find.byType(Scrollable),
-      ).first,
+      scrollable: find
+          .descendant(
+            of: find.byType(ListView).first,
+            matching: find.byType(Scrollable),
+          )
+          .first,
     );
     await tester.tap(find.text('Kirim hasil'));
     await tester.pumpAndSettle();
