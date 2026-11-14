@@ -1,0 +1,13 @@
+CARA MENCOBA KLIK DI HP ANDROID
+
+1. Ambil file KLIK-Flutter-Testing.apk yang berada di folder proyek ini.
+2. Pindahkan file APK tersebut ke HP Android menggunakan kabel USB atau layanan pengiriman file pilihanmu.
+3. Pada HP, buka file APK melalui aplikasi Files/File Manager, lalu pilih Instal.
+4. Jika Android meminta izin memasang dari aplikasi pengelola file itu, berikan izin untuk pemasangan APK ini.
+5. Buka aplikasi KLIK, lalu pilih Coba tanpa akun.
+
+Yang bisa dicoba: tema terang/gelap, pencarian, detail kegiatan, gabung/keluar kegiatan, membuat ruang/acara, mengubah profil dan pilihan komunitas lokal. Hasil pertandingan milikmu dapat diajukan setelah jadwalnya selesai; hasil tetap menunggu konfirmasi.
+
+Versi ini untuk percobaan lokal. Data tersimpan di perangkat ini, belum terhubung ke pengguna lain. Login online belum aktif karena proyek Supabase belum tersedia. Data dapat hilang jika data aplikasi dihapus atau aplikasi dicopot.
+
+Kode sumber berada di folder lib. Buka folder KLIK-Flutter melalui File > Open Folder di VS Code. Rincian pengembangan dan hasil pemeriksaan tersedia di README.md dan VALIDATION.md.
