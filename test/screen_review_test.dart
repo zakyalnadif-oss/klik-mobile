@@ -158,6 +158,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(0), '5');
     await tester.enterText(find.byType(TextFormField).at(1), '3');
     await tester.tap(find.byType(CheckboxListTile));
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
       find.text('Kirim hasil'),
       200,
@@ -167,6 +168,12 @@ void main() {
             matching: find.byType(Scrollable),
           )
           .first,
+    );
+    expect(
+      tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Kirim hasil'),
+      ).onPressed,
+      isNotNull,
     );
     await tester.tap(find.text('Kirim hasil'));
     await tester.pumpAndSettle();

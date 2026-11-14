@@ -11,6 +11,8 @@ android/local.properties
 android/key.properties
 *.jks
 *.keystore
+*.apk
+*.aab
 ios/Pods/
 ios/.symlinks/
 ios/Flutter/ephemeral/
