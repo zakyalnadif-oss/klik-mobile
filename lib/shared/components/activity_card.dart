@@ -5,9 +5,40 @@ import '../../data/models/activity.dart';
 import '../widgets/klik_ui.dart';
 
 class ActivityCard extends StatelessWidget {
-  const ActivityCard(this.activity, {this.joined = false, super.key});
+  const ActivityCard(
+    this.activity, {
+    this.joined = false,
+    this.fillHeight = false,
+    super.key,
+  });
   final Activity activity;
-  final bool joined;
+  final bool joined, fillHeight;
+
+  Widget _footer(BuildContext context, List<Widget> children) {
+    final stack =
+        MediaQuery.sizeOf(context).width < 360 &&
+        MediaQuery.textScalerOf(context).scale(11) > 16;
+    return SizedBox(
+      width: double.infinity,
+      child: stack
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                children.first,
+                const SizedBox(height: 8),
+                Align(alignment: Alignment.centerRight, child: children.last),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: children.first),
+                const SizedBox(width: 10),
+                children.last,
+              ],
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final a = activity;
@@ -53,18 +84,29 @@ class ActivityCard extends StatelessWidget {
               const SizedBox(width: 8),
               if (a.isEvent)
                 Flexible(
-                  child: Text(
-                    '${rupiah(a.price)} / peserta',
-                    textAlign: TextAlign.right,
-                    style: textStyle(
-                      10,
-                      weight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.primary,
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: Text(
+                      '${rupiah(a.price)} / peserta',
+                      textAlign: TextAlign.right,
+                      style: textStyle(
+                        10,
+                        weight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 )
               else
-                Flexible(child: KBadge(a.mode)),
+                Flexible(
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: KBadge(
+                      a.mode,
+                      key: ValueKey('activity-mode-${a.id}'),
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 8),
@@ -77,74 +119,68 @@ class ActivityCard extends StatelessWidget {
             '${dayLabel(a.startsAt)} • ${timeLabel(a.startsAt)}\n${a.venue}${a.isEvent ? ' • Oleh ${a.owner}' : ''}',
             style: textStyle(11, color: secondary(context)),
           ),
+          if (fillHeight) const Spacer(),
           const SizedBox(height: 12),
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 10,
-            runSpacing: 8,
-            children: [
-              SizedBox(
-                width: 140,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (a.isEvent)
-                      Text(
-                        'Pendaftaran Dibuka',
-                        style: textStyle(
-                          10,
-                          weight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+          _footer(context, [
+            SizedBox(
+              width: 140,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (a.isEvent)
+                    Text(
+                      'Pendaftaran Dibuka',
+                      style: textStyle(
+                        10,
+                        weight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                    if (a.isEvent)
-                      Text(
-                        '${a.occupied}/${a.capacity} peserta',
-                        style: textStyle(10, color: secondary(context)),
-                      )
-                    else
-                      Row(
-                        children: [
-                          const FigmaIcon('status'),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: '${a.remaining} slot',
-                                    style: textStyle(12),
+                    ),
+                  if (a.isEvent)
+                    Text(
+                      '${a.occupied}/${a.capacity} peserta',
+                      style: textStyle(10, color: secondary(context)),
+                    )
+                  else
+                    Row(
+                      children: [
+                        const FigmaIcon('status'),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '${a.remaining} slot',
+                                  style: textStyle(12),
+                                ),
+                                TextSpan(
+                                  text: ' tersisa',
+                                  style: textStyle(
+                                    11,
+                                    color: secondary(context),
                                   ),
-                                  TextSpan(
-                                    text: ' tersisa',
-                                    style: textStyle(
-                                      11,
-                                      color: secondary(context),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                  ],
-                ),
+                        ),
+                      ],
+                    ),
+                ],
               ),
-              FilledButton(
-                onPressed: () => openActivity(context, a.id),
-                child: Text(
-                  joined
-                      ? 'Lihat Detail'
-                      : a.isEvent
-                      ? 'Lihat Acara'
-                      : 'Gabung',
-                  style: textStyle(11, weight: FontWeight.w600),
-                ),
+            ),
+            FilledButton(
+              key: ValueKey('activity-action-${a.id}'),
+              onPressed: () => openActivity(context, a.id),
+              child: Text(
+                a.isEvent
+                    ? (joined ? 'Lihat Detail' : 'Lihat Acara')
+                    : 'Gabung',
+                style: textStyle(11, weight: FontWeight.w600),
               ),
-            ],
-          ),
+            ),
+          ]),
         ],
       ),
     );

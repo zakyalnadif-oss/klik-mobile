@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../data/providers/local_state.dart';
 import '../../../shared/components/activity_card.dart';
+import '../../../shared/components/event_carousel.dart';
 import '../../../shared/components/ranking_preview.dart';
 import '../../../shared/widgets/klik_ui.dart';
 
@@ -258,24 +259,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onAction: () => context.push('/new/event'),
               )
             else
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (final event in events)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width - 70,
-                          child: ActivityCard(
-                            event,
-                            joined: joined.contains(event.id),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+              EventCarousel(
+                events: events,
+                joined: joined.cast<String>().toSet(),
               ),
             const SizedBox(height: 8),
             SectionTitle(

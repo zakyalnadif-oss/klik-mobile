@@ -49,6 +49,14 @@ jobs:
           mkdir -p build/review
           set -o pipefail
           flutter test --reporter expanded 2>&1 | tee build/review/flutter-tests.log
+      - name: Upload visual review and test log
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: KLIK-UI-Review-${{ github.run_number }}
+          path: build/review/
+          if-no-files-found: warn
+          retention-days: 7
       - name: Build Android testing APK
         run: flutter build apk --debug --no-pub
       - name: Upload APK
@@ -59,11 +67,3 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
-      - name: Upload visual review and test log
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: KLIK-UI-Review-${{ github.run_number }}
-          path: build/review/
-          if-no-files-found: warn
-          retention-days: 7

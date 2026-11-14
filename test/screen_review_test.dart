@@ -41,6 +41,18 @@ void main() {
     });
     final repository = MemoryRepository()
       ..record = {...data!, 'onboarded': true, 'theme': 'light'};
+    final events = repository.record['activities'] as List;
+    final originalEvent = Map<String, dynamic>.from(
+      events.firstWhere((a) => a['kind'] == 'event') as Map,
+    );
+    events.add({
+      ...originalEvent,
+      'id': 'review-long-event',
+      'title': 'Kompetisi Futsal Komunitas Cilandak dan Teman Kampus',
+      'venue': 'Lapangan Futsal Cilandak, Jakarta Selatan',
+      'owned': true,
+    });
+    (repository.record['joined'] as List).add('review-long-event');
     const captureKey = ValueKey('review-boundary');
     await tester.pumpWidget(
       RepaintBoundary(
@@ -170,9 +182,11 @@ void main() {
           .first,
     );
     expect(
-      tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Kirim hasil'),
-      ).onPressed,
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Kirim hasil'),
+          )
+          .onPressed,
       isNotNull,
     );
     await tester.tap(find.text('Kirim hasil'));

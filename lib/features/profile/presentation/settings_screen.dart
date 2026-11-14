@@ -47,7 +47,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
         const SectionTitle('Versi aplikasi'),
-        const Text('KLIK 0.4.0 • Uji coba lokal'),
+        const Text('KLIK 0.4.1 • Uji coba lokal'),
         KButton(
           'Akun dan login',
           secondary: true,
