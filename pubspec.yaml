@@ -1,7 +1,7 @@
 name: klik_mobile
 description: Aplikasi olahraga KLIK dengan mode uji coba lokal.
 publish_to: none
-version: 0.4.1+5
+version: 0.4.2+6
 environment:
   sdk: '>=3.13.0 <4.0.0'
   flutter: '>=3.47.0'
@@ -14,6 +14,7 @@ dependencies:
   material_ui: ^1.11.0
   shared_preferences: ^2.5.6
   flutter_svg: ^2.4.0
+  qr_flutter: ^4.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

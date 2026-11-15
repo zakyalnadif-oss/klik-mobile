@@ -33,7 +33,12 @@ abstract final class ActivityRules {
     }
   }
 
-  static void join(Map<String, dynamic> data, String id, DateTime now) {
+  static void join(
+    Map<String, dynamic> data,
+    String id,
+    DateTime now, {
+    bool previewPaymentConfirmed = false,
+  }) {
     final list = data['joined'] as List;
     if (list.contains(id)) return;
     final found = (data['activities'] as List)
@@ -41,6 +46,9 @@ abstract final class ActivityRules {
         .where((a) => a['id'] == id);
     if (found.isEmpty) throw StateError('Kegiatan tidak ditemukan.');
     final row = found.first;
+    if ((row['price'] as int) > 0 && !previewPaymentConfirmed) {
+      throw StateError('Lanjutkan pembayaran terlebih dahulu.');
+    }
     if ((row['occupied'] as int) >= (row['capacity'] as int)) {
       throw StateError('Kegiatan sudah penuh.');
     }

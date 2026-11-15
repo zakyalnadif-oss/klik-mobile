@@ -20,6 +20,7 @@ import '../../features/tanding/presentation/matches_screen.dart';
 import '../../features/tanding/presentation/score_screen.dart';
 import '../../features/venues/presentation/venue_screen.dart';
 import '../../features/leaderboard/presentation/leaderboard_screen.dart';
+import '../../features/payments/presentation/checkout_screen.dart';
 import '../../shared/components/app_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -87,6 +88,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/activity/:id',
         builder: (c, s) => ActivityDetailScreen(id: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/checkout/:id',
+        builder: (c, s) => CheckoutScreen(id: s.pathParameters['id']!),
       ),
       GoRoute(
         path: '/player/:id',

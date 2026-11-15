@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/events/logic/activity_rules.dart';
 import '../../features/tanding/logic/match_rules.dart';
+import '../../features/payments/logic/checkout_rules.dart';
 import '../models/activity.dart';
 import '../models/local_record.dart';
 import '../repositories/local_repository.dart';
@@ -43,6 +44,12 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
       });
   Future<void> join(String id) =>
       change((j) => ActivityRules.join(j, id, DateTime.now()));
+  Future<void> openCheckout(String id) =>
+      change((j) => CheckoutRules.open(j, id, DateTime.now()));
+  Future<void> confirmCheckout(String id, String reference) =>
+      change((j) => CheckoutRules.confirm(j, id, reference, DateTime.now()));
+  Future<void> cancelCheckout(String id) =>
+      change((j) => CheckoutRules.cancel(j, id));
   Future<void> leave(String id) => change((j) => ActivityRules.leave(j, id));
   Future<void> create(Activity activity) => change((j) {
     ActivityRules.validateNew(activity, DateTime.now());

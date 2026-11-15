@@ -146,10 +146,14 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
             onPressed: a.remaining == 0
                 ? null
                 : () async {
+                    if (a.price > 0) {
+                      context.push('/checkout/${a.id}');
+                      return;
+                    }
                     if (!await confirmAction(
                       context,
                       a.isEvent ? 'Tinjau pendaftaran' : 'Gabung ruang ini?',
-                      'Kamu akan bergabung dalam mode uji coba lokal. Biaya ${rupiah(a.price)} hanya informasi contoh; tidak ada pembayaran.',
+                      'Pertandingan ini gratis. Lanjutkan bergabung?',
                     )) {
                       return;
                     }

@@ -1,4 +1,5 @@
 import 'activity.dart';
+import 'checkout_preview.dart';
 
 abstract final class LocalRecord {
   static const sports = [
@@ -54,6 +55,26 @@ abstract final class LocalRecord {
       }
       if ((data['joined'] as List).any((id) => !ids.contains(id))) {
         throw const FormatException();
+      }
+      if (data['checkoutPreviews'] != null) {
+        for (final entry in (data['checkoutPreviews'] as Map).entries) {
+          final order = CheckoutPreview.fromJson(
+            Map<String, dynamic>.from(entry.value as Map),
+          );
+          if (!ids.contains(entry.key) ||
+              order.activityId != entry.key ||
+              order.reference.isEmpty ||
+              order.amount <= 0 ||
+              order.amount > 100000000 ||
+              !order.expiresAt.isAfter(order.createdAt) ||
+              ![
+                'pending',
+                'demo_confirmed',
+                'cancelled',
+              ].contains(order.status)) {
+            throw const FormatException();
+          }
+        }
       }
       for (final row in data['players'] as List) {
         final player = row as Map;

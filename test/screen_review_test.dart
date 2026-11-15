@@ -109,6 +109,8 @@ void main() {
       'events': '/search?tab=Acara',
       'event': '/activity/event-cilandak',
       'room': '/activity/room-cilandak',
+      'room-checkout': '/checkout/room-cilandak',
+      'event-checkout': '/checkout/event-cilandak',
       'new-room': '/new/room',
       'new-event': '/new/event',
       'edit-profile': '/edit-profile',
@@ -201,6 +203,20 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -1600));
     await capture('pending-result-dark');
+    router.go('/checkout/room-cilandak');
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Konfirmasi pembayaran'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Konfirmasi pembayaran'));
+    await tester.pumpAndSettle();
+    expect(
+      container.read(localStateProvider).requireValue['joined'],
+      contains('room-cilandak'),
+    );
+    await capture('checkout-confirmed-dark');
     tester.view.physicalSize = const Size(320, 568);
     tester.platformDispatcher.textScaleFactorTestValue = 2;
     for (final entry in routes.entries.where(
@@ -216,6 +232,7 @@ void main() {
         'leaderboard',
         'edit-profile',
         'settings',
+        'event-checkout',
       ].contains(e.key),
     )) {
       router.go(entry.value);

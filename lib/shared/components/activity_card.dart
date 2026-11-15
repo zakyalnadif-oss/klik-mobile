@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/utils/formatters.dart';
 import '../../data/models/activity.dart';
@@ -172,7 +173,13 @@ class ActivityCard extends StatelessWidget {
             ),
             FilledButton(
               key: ValueKey('activity-action-${a.id}'),
-              onPressed: () => openActivity(context, a.id),
+              onPressed: () {
+                if (!a.isEvent && a.price > 0 && !joined) {
+                  context.push('/checkout/${a.id}');
+                } else {
+                  openActivity(context, a.id);
+                }
+              },
               child: Text(
                 a.isEvent
                     ? (joined ? 'Lihat Detail' : 'Lihat Acara')
