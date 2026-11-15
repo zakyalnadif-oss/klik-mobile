@@ -157,9 +157,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ),
                 if (order?.confirmed == true) ...[
                   const SizedBox(height: 20),
-                  Text(
-                    rupiah(order!.amount),
-                    style: textStyle(28, weight: FontWeight.w800),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      rupiah(order!.amount),
+                      maxLines: 1,
+                      style: textStyle(28, weight: FontWeight.w800),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text('Konfirmasi pembayaran diterima'),
@@ -212,11 +216,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 style: textStyle(13, color: secondary(context)),
               ),
               const SizedBox(height: 8),
-              Text(
-                rupiah(order.amount),
-                key: const ValueKey('checkout-amount'),
-                style: textStyle(30, weight: FontWeight.w800),
-                textAlign: TextAlign.center,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  rupiah(order.amount),
+                  key: const ValueKey('checkout-amount'),
+                  maxLines: 1,
+                  style: textStyle(30, weight: FontWeight.w800),
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(height: 20),
               Container(

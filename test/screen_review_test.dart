@@ -237,6 +237,10 @@ void main() {
     )) {
       router.go(entry.value);
       await capture('${entry.key}-small-large-text');
+      if (entry.key == 'event-checkout') {
+        await tester.drag(find.byType(ListView).first, const Offset(0, -600));
+        await capture('event-checkout-small-qr');
+      }
     }
     await tester.pumpWidget(const SizedBox.shrink());
   });

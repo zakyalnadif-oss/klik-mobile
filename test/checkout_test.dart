@@ -211,4 +211,31 @@ void main() {
     expect(find.byType(QrImageView), findsNothing);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+  testWidgets('checkout amount stays within the card at 200 percent text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final repository = MemoryRepository();
+    repository.record['activities'][0]['price'] = 35000;
+    await tester.pumpWidget(app(repository));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MaterialApp)),
+    );
+    container.read(appRouterProvider).go('/checkout/test-room');
+    await tester.pumpAndSettle();
+    final amount = tester.getRect(
+      find.byKey(const ValueKey('checkout-amount')),
+    );
+    expect(amount.left, greaterThanOrEqualTo(24));
+    expect(amount.right, lessThanOrEqualTo(296));
+    expect(find.text('Rp35.000'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }

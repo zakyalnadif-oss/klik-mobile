@@ -1,20 +1,21 @@
-CARA MEMASANG KLIK 0.4.1 DI HP ANDROID
+CARA MENCOBA KLIK 0.4.2 DI HP ANDROID
 
-APK terbaru: KLIK-0.4.1-Testing.apk
+APK terbaru: KLIK-0.4.2-Testing.apk
 
-Versi sebelumnya memakai kunci APK sementara, sehingga Android dapat menolak pembaruan langsung. Untuk mengganti versi lama pada percobaan ini:
-1. Pastikan data percobaan lama memang boleh dihapus. Data lokal ikut terhapus ketika aplikasi dicopot.
-2. Di HP, tekan lama ikon KLIK, lalu pilih Uninstall/Copot pemasangan.
-3. Pindahkan KLIK-0.4.1-Testing.apk dari folder LOMBA/KLIK-Flutter ke HP.
-4. Buka APK melalui Files/File Manager, lalu pilih Instal.
-5. Jika Android meminta izin memasang dari pengelola file tersebut, berikan izin untuk pemasangan APK ini.
-6. Buka KLIK, lalu pilih Coba tanpa akun.
+Untuk contoh alur QRIS:
+1. Buka KLIK dan pilih Coba tanpa akun.
+2. Pada Ruang Terdekat, pilih Gabung di pertandingan berbayar, misalnya Futsal Cilandak Berperingkat.
+3. Halaman Pembayaran langsung menampilkan QR dan nominal pertandingan.
+4. Gulir ke bawah, lalu tekan Konfirmasi pembayaran.
+5. Pendaftaran selesai dan peserta masuk ke pertandingan.
+6. Coba juga Batalkan: peserta tidak akan bergabung.
 
-Coba kembali:
-- Buat event dengan judul pendek dan panjang, lalu lihat kartu event di Beranda. Tinggi kartu harus sama.
-- Buka Ruang Terdekat. Label Kasual/Berperingkat dan tombol Gabung berada di sisi kanan kartu.
-- Ganti tema terang/gelap dan coba ukuran tulisan besar.
+Untuk event, buka Lihat Acara, kemudian Daftar Event untuk melihat QR. Pertandingan gratis tidak menampilkan pembayaran.
 
-Data tersimpan di HP ini. Akun online dan data bersama belum aktif karena proyek Supabase belum tersedia.
+QR ini hanya untuk contoh tampilan: isinya data JSON, bukan kode QRIS pembayaran bank/dompet digital. Tidak ada uang yang dikirim atau diterima. Konfirmasi dilakukan lokal melalui tombol, bukan pemeriksaan transaksi Midtrans. Tulisan Simulasi tidak ditampilkan pada layar pembayaran.
 
-Kode sumber berada di folder lib. Untuk mengedit, buka folder KLIK-Flutter melalui File > Open Folder di VS Code. Catatan perubahan ada di CHANGES-0.4.1.md; hasil pemeriksaan ada di VALIDATION.md.
+Pemasangan APK:
+- Pindahkan KLIK-0.4.2-Testing.apk ke HP, lalu buka melalui Files/File Manager dan pilih Instal.
+- APK uji coba memakai sertifikat sementara. Jika Android menolak pembaruan langsung, aplikasi lama perlu dicopot sebelum memasang versi ini. Pencopotan menghapus data lokal; lakukan hanya jika data percobaan memang boleh dihapus.
+
+Kode sumber berada di folder lib. Buka folder KLIK-Flutter melalui File > Open Folder di VS Code. Catatan versi ini: CHANGES-0.4.2.md. Hasil pemeriksaan: VALIDATION.md.
