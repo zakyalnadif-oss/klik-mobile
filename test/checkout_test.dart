@@ -165,6 +165,7 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Gabung'));
     await tester.pumpAndSettle();
     expect(find.byType(QrImageView), findsOneWidget);
@@ -176,6 +177,7 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Konfirmasi pembayaran'));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('checkout-complete')), findsOneWidget);
@@ -198,6 +200,7 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Batalkan'));
     await tester.pumpAndSettle();
     expect(repository.record['joined'], isEmpty);
