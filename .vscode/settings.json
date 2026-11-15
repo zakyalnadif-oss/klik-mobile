@@ -1,4 +1,5 @@
 {
   "editor.formatOnSave": true,
+  "dart.flutterHotReloadOnSave": "all",
   "[dart]": {"editor.defaultFormatter": "Dart-Code.dart-code"}
 }
