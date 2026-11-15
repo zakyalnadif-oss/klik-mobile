@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/local_record.dart';
+import '../models/ranked_match.dart';
 
 class LocalRepository {
   static const storageKey = 'klik.local.testing.v2';
@@ -14,7 +16,12 @@ class LocalRepository {
       try {
         final parsed = jsonDecode(raw);
         if (parsed is Map<String, dynamic> && parsed['version'] == 2) {
-          return LocalRecord.validate(parsed);
+          LocalRecord.validate(parsed);
+          if (_prepareRankedData(parsed)) {
+            LocalRecord.validate(parsed);
+            await save(parsed);
+          }
+          return parsed;
         }
       } on FormatException {
         // Preserve an unreadable record for inspection rather than overwriting it.
@@ -38,7 +45,7 @@ class LocalRepository {
       j['demo'] = true;
       return j;
     }).toList();
-    return {
+    final record = <String, dynamic>{
       'version': 2,
       'onboarded': false,
       'name': 'Pemain KLIK',
@@ -57,6 +64,37 @@ class LocalRepository {
       'results': <String, dynamic>{},
       'readNotifications': false,
     };
+    _prepareRankedData(record);
+    return record;
+  }
+
+  bool _prepareRankedData(Map<String, dynamic> data) {
+    var changed = false;
+    if (data['playerId'] == null) {
+      data['playerId'] =
+          'local-${DateTime.now().microsecondsSinceEpoch}-${Random.secure().nextInt(0x100000000).toRadixString(16)}';
+      changed = true;
+    }
+    final matches = data['rankedMatches'] as Map? ?? <String, dynamic>{};
+    for (final a in (data['activities'] as List).cast<Map>()) {
+      if (a['id'] == 'room-cilandak' &&
+          a['demo'] == true &&
+          a['owned'] != true &&
+          a['mode'] == 'Berperingkat' &&
+          !matches.containsKey(a['id'])) {
+        matches[a['id']] = const RankedMatch(
+          teamA: MatchTeam(
+            id: 'example-team-rizky',
+            name: 'Tim Rizky',
+            captainId: 'example-captain-rizky',
+            captainName: 'Rizky Saputra',
+          ),
+        ).toJson();
+        changed = true;
+      }
+    }
+    if (matches.isNotEmpty) data['rankedMatches'] = matches;
+    return changed;
   }
 
   Future<void> save(Map<String, dynamic> value) async {

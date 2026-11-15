@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:klik_mobile/data/models/activity.dart';
+import 'package:klik_mobile/data/models/ranked_match.dart';
 import 'package:klik_mobile/data/models/local_record.dart';
 import 'package:klik_mobile/data/repositories/record_queue.dart';
 import 'package:klik_mobile/features/events/logic/activity_rules.dart';
@@ -134,18 +135,45 @@ Future<void> main() async {
     () => ActivityRules.leave(record(activity(owned: true)), 'a'),
     'owner cannot leave',
   );
+  void rankedScoring(Map<String, dynamic> j) {
+    j['activities'][0]['mode'] = 'Berperingkat';
+    j['rankedMatches'] = {
+      'a': const RankedMatch(
+        teamA: MatchTeam(
+          id: 'team-a',
+          name: 'Tim A',
+          captainId: 'local-player',
+          captainName: 'Ketua A',
+        ),
+        teamB: MatchTeam(
+          id: 'team-b',
+          name: 'Tim B',
+          captainId: 'captain-b',
+          captainName: 'Ketua B',
+        ),
+      ).toJson(),
+    };
+  }
+
   final ended = record(
     activity(owned: true, start: now.subtract(const Duration(hours: 3))),
   );
   (ended['joined'] as List).add('a');
+  rankedScoring(ended);
   MatchRules.submit(ended, 'a', 5, 3, now);
   check(
     ended['results']['a']['status'] == 'Menunggu konfirmasi',
     'result remains pending',
   );
+  ended['playerId'] = 'captain-b';
+  MatchRules.submit(ended, 'a', 5, 3, now);
+  check(
+    ended['results']['a']['status'] == 'Disahkan',
+    'matching captains approve result',
+  );
   rejects(
     () => MatchRules.submit(ended, 'a', 9, 0, now),
-    'duplicate result rejected',
+    'approved result locked',
   );
   check(ended['results']['a']['own'] == 5, 'existing result preserved');
   Map<String, dynamic> scoring({
@@ -162,12 +190,19 @@ Future<void> main() async {
       ),
     );
     if (joined) (j['joined'] as List).add('a');
+    rankedScoring(j);
     return j;
   }
 
   rejects(
-    () => MatchRules.submit(scoring(owned: false), 'a', 1, 0, now),
-    'nonowner cannot score',
+    () => MatchRules.submit(
+      scoring()..['playerId'] = 'ordinary-member',
+      'a',
+      1,
+      0,
+      now,
+    ),
+    'ordinary member cannot score',
   );
   rejects(
     () => MatchRules.submit(scoring(joined: false), 'a', 1, 0, now),
@@ -193,7 +228,7 @@ Future<void> main() async {
   MatchRules.submit(rename, 'a', 1, 0, now);
   check(
     rename['results']['a']['own'] == 1,
-    'ownership survives profile rename',
+    'captain access survives profile rename',
   );
   LocalRecord.validate(record(activity()));
   check(true, 'valid record accepted');

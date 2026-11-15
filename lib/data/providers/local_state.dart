@@ -51,7 +51,7 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
   Future<void> cancelCheckout(String id) =>
       change((j) => CheckoutRules.cancel(j, id));
   Future<void> leave(String id) => change((j) => ActivityRules.leave(j, id));
-  Future<void> create(Activity activity) => change((j) {
+  Future<void> create(Activity activity, {String? teamName}) => change((j) {
     ActivityRules.validateNew(activity, DateTime.now());
     if ((j['activities'] as List).any((a) => a['id'] == activity.id)) {
       throw StateError('Kegiatan sudah dibuat.');
@@ -62,7 +62,12 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
       'owner': j['name'],
     });
     (j['joined'] as List).add(activity.id);
+    if (MatchRules.rankedRoom(activity) && teamName != null) {
+      MatchRules.registerTeam(j, activity.id, teamName, DateTime.now());
+    }
   });
+  Future<void> registerMatchTeam(String id, String name) =>
+      change((j) => MatchRules.registerTeam(j, id, name, DateTime.now()));
   Future<void> requestFriend(String id) => change((j) {
     if (!(j['players'] as List).any((p) => p['id'] == id)) {
       throw StateError('Pemain tidak ditemukan.');

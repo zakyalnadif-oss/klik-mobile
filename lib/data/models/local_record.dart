@@ -1,5 +1,6 @@
 import 'activity.dart';
 import 'checkout_preview.dart';
+import 'ranked_match.dart';
 
 abstract final class LocalRecord {
   static const sports = [
@@ -55,6 +56,41 @@ abstract final class LocalRecord {
       }
       if ((data['joined'] as List).any((id) => !ids.contains(id))) {
         throw const FormatException();
+      }
+      if (data['playerId'] != null &&
+          (data['playerId'] is! String ||
+              (data['playerId'] as String).trim().isEmpty)) {
+        throw const FormatException();
+      }
+      if (data['rankedMatches'] != null) {
+        for (final entry in (data['rankedMatches'] as Map).entries) {
+          final a = records.cast<Map>().where((a) => a['id'] == entry.key);
+          final fixture = RankedMatch.fromJson(entry.value as Map);
+          if (a.isEmpty ||
+              a.first['kind'] != 'room' ||
+              a.first['mode'] != 'Berperingkat') {
+            throw const FormatException();
+          }
+          for (final team in [
+            fixture.teamA,
+            if (fixture.teamB != null) fixture.teamB!,
+          ]) {
+            if ([
+                  team.id,
+                  team.name,
+                  team.captainId,
+                  team.captainName,
+                ].any((s) => s.trim().isEmpty) ||
+                team.name.length > 60) {
+              throw const FormatException();
+            }
+          }
+          if (fixture.teamB != null &&
+              (fixture.teamA.id == fixture.teamB!.id ||
+                  fixture.teamA.captainId == fixture.teamB!.captainId)) {
+            throw const FormatException();
+          }
+        }
       }
       if (data['checkoutPreviews'] != null) {
         for (final entry in (data['checkoutPreviews'] as Map).entries) {
@@ -128,9 +164,53 @@ abstract final class LocalRecord {
             (result['other'] as int) < 0 ||
             (result['own'] as int) > 999 ||
             (result['other'] as int) > 999 ||
-            result['status'] != 'Menunggu konfirmasi' ||
+            (result['schema'] != 2 &&
+                result['status'] != 'Menunggu konfirmasi') ||
             DateTime.tryParse(result['at'] as String) == null) {
           throw const FormatException();
+        }
+        if (result['schema'] == 2) {
+          final fixture = RankedMatch.read(data, entry.key as String);
+          if (fixture?.ready != true) throw const FormatException();
+          final submissions = result['submissions'] as Map;
+          final captains = {fixture!.teamA.captainId, fixture.teamB!.captainId};
+          if (submissions.isEmpty ||
+              submissions.keys.any((k) => !captains.contains(k))) {
+            throw const FormatException();
+          }
+          for (final raw in submissions.values) {
+            final s = raw as Map;
+            if (s['scoreA'] is! int ||
+                s['scoreB'] is! int ||
+                s['scoreA'] < 0 ||
+                s['scoreB'] < 0 ||
+                s['scoreA'] > 999 ||
+                s['scoreB'] > 999 ||
+                DateTime.tryParse(s['at'] as String) == null) {
+              throw const FormatException();
+            }
+          }
+          final first = submissions[fixture.teamA.captainId] as Map?;
+          final second = submissions[fixture.teamB!.captainId] as Map?;
+          final both = first != null && second != null;
+          final agree =
+              both &&
+              first['scoreA'] == second['scoreA'] &&
+              first['scoreB'] == second['scoreB'];
+          final expected = agree
+              ? 'Disahkan'
+              : both
+              ? 'Skor berbeda'
+              : 'Menunggu konfirmasi';
+          final canonical = first ?? second!;
+          if (result['status'] != expected ||
+              result['own'] != canonical['scoreA'] ||
+              result['other'] != canonical['scoreB'] ||
+              (agree &&
+                  DateTime.tryParse(result['confirmedAt'] as String) == null) ||
+              (!agree && result['confirmedAt'] != null)) {
+            throw const FormatException();
+          }
         }
       }
       return data;

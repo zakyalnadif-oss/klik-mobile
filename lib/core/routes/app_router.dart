@@ -18,6 +18,8 @@ import '../../features/profile/presentation/settings_screen.dart';
 import '../../features/profile/presentation/team_screen.dart';
 import '../../features/tanding/presentation/matches_screen.dart';
 import '../../features/tanding/presentation/score_screen.dart';
+import '../../features/tanding/presentation/match_teams_screen.dart';
+import '../../features/tanding/presentation/score_example_screen.dart';
 import '../../features/venues/presentation/venue_screen.dart';
 import '../../features/leaderboard/presentation/leaderboard_screen.dart';
 import '../../features/payments/presentation/checkout_screen.dart';
@@ -102,6 +104,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (c, s) => ScoreScreen(id: s.pathParameters['id']!),
       ),
       GoRoute(
+        path: '/match-teams/:id',
+        builder: (c, s) => MatchTeamsScreen(id: s.pathParameters['id']!),
+      ),
+      GoRoute(
         path: '/venue/:name',
         builder: (c, s) => VenueScreen(name: s.pathParameters['name']!),
       ),
@@ -111,6 +117,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/settings', builder: (c, s) => const SettingsScreen()),
       GoRoute(path: '/team', builder: (c, s) => const TeamScreen()),
+      GoRoute(
+        path: '/score-example',
+        builder: (c, s) => const ScoreExampleScreen(),
+      ),
       GoRoute(
         path: '/leaderboard',
         builder: (c, s) => const LeaderboardScreen(),

@@ -11,6 +11,7 @@ import 'package:klik_mobile/app.dart';
 import 'package:klik_mobile/core/routes/app_router.dart';
 import 'package:klik_mobile/core/theme/theme_controller.dart';
 import 'package:klik_mobile/data/models/activity.dart';
+import 'package:klik_mobile/data/models/ranked_match.dart';
 import 'package:klik_mobile/data/providers/local_state.dart';
 import 'package:klik_mobile/data/repositories/local_repository.dart';
 
@@ -124,6 +125,8 @@ void main() {
       'reset-password': '/reset-password',
       'notifications': '/notifications',
       'welcome': '/welcome',
+      'match-teams': '/match-teams/room-cilandak',
+      'score-example': '/score-example',
     };
     for (final theme in [ThemeMode.light, ThemeMode.dark]) {
       await container.read(themeModeProvider.notifier).select(theme);
@@ -153,7 +156,7 @@ void main() {
       sport: 'Futsal',
       venue: 'Futsal Cilandak',
       city: 'Jakarta Selatan',
-      mode: 'Kasual',
+      mode: 'Berperingkat',
       startsAt: DateTime.now().subtract(const Duration(hours: 3)),
       capacity: 10,
       occupied: 2,
@@ -166,6 +169,21 @@ void main() {
     await container.read(localStateProvider.notifier).change((j) {
       (j['activities'] as List).add(ended.toJson());
       (j['joined'] as List).add(ended.id);
+      (j.putIfAbsent('rankedMatches', () => <String, dynamic>{})
+          as Map)[ended.id] = RankedMatch(
+        teamA: MatchTeam(
+          id: 'review-team-a',
+          name: 'Tim Merah',
+          captainId: localPlayerId(j),
+          captainName: j['name'] as String,
+        ),
+        teamB: const MatchTeam(
+          id: 'review-team-b',
+          name: 'Tim Biru',
+          captainId: 'review-captain-b',
+          captainName: 'Ketua Biru',
+        ),
+      ).toJson();
     });
     router.go('/score/${ended.id}');
     await capture('input-score-dark');
@@ -203,6 +221,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -1600));
     await capture('pending-result-dark');
+    final firstCaptain = localPlayerId(container.read(localStateProvider).requireValue);
+    await container.read(localStateProvider.notifier).change((j) => j['playerId'] = 'review-captain-b');
+    await container.read(localStateProvider.notifier).submitScore(ended.id, 4, 3);
+    await tester.drag(find.byType(ListView).first, const Offset(0, -600));
+    await capture('disputed-result-dark');
+    await container.read(localStateProvider.notifier).submitScore(ended.id, 5, 3);
+    await tester.drag(find.byType(ListView).first, const Offset(0, -600));
+    await capture('approved-result-dark');
+    await container.read(localStateProvider.notifier).change((j) => j['playerId'] = firstCaptain);
     router.go('/checkout/room-cilandak');
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
@@ -233,6 +260,8 @@ void main() {
         'edit-profile',
         'settings',
         'event-checkout',
+        'match-teams',
+        'score-example',
       ].contains(e.key),
     )) {
       router.go(entry.value);

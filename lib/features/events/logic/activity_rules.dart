@@ -1,5 +1,6 @@
 import '../../../data/models/activity.dart';
 import '../../../data/models/local_record.dart';
+import '../../../data/models/ranked_match.dart';
 
 abstract final class ActivityRules {
   static void validateNew(Activity activity, DateTime now) {
@@ -59,7 +60,7 @@ abstract final class ActivityRules {
     row['occupied'] = (row['occupied'] as int) + 1;
   }
 
-  static void leave(Map<String, dynamic> data, String id) {
+  static void leave(Map<String, dynamic> data, String id, {DateTime? now}) {
     final found = (data['activities'] as List)
         .cast<Map<String, dynamic>>()
         .where((a) => a['id'] == id);
@@ -73,11 +74,22 @@ abstract final class ActivityRules {
     if ((data['results'] as Map).containsKey(id)) {
       throw StateError('Hasil kegiatan sudah dikirim.');
     }
+    final fixture = RankedMatch.read(data, id);
+    final captainB = fixture?.teamB?.captainId == localPlayerId(data);
+    if (captainB &&
+        !(now ?? DateTime.now()).isBefore(
+          DateTime.parse(row['startsAt'] as String),
+        )) {
+      throw StateError(
+        'Ketua tim tidak dapat keluar setelah pertandingan dimulai.',
+      );
+    }
     if ((data['joined'] as List).remove(id)) {
       row['occupied'] = ((row['occupied'] as int) - 1).clamp(
         0,
         row['capacity'] as int,
       );
+      if (captainB) ((data['rankedMatches'] as Map)[id] as Map)['teamB'] = null;
     }
   }
 }

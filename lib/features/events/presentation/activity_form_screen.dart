@@ -21,6 +21,7 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
       capacity = TextEditingController(text: '10'),
       price = TextEditingController(text: '0'),
       description = TextEditingController();
+  final teamName = TextEditingController();
   String sport = 'Futsal', mode = 'Kasual';
   int step = 0;
   bool busy = false, agree = false;
@@ -28,8 +29,15 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
   TimeOfDay time = const TimeOfDay(hour: 19, minute: 0);
   int duration = 120;
   @override
+  void initState() {
+    super.initState();
+    teamName.text =
+        ref.read(localStateProvider).requireValue['teamName'] as String? ?? '';
+  }
+
+  @override
   void dispose() {
-    for (final c in [title, venue, capacity, price, description]) {
+    for (final c in [title, venue, capacity, price, description, teamName]) {
       c.dispose();
     }
     super.dispose();
@@ -109,6 +117,15 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
                 ],
               ),
               const SizedBox(height: 12),
+              if (widget.kind == 'room' && mode == 'Berperingkat') ...[
+                TextFormField(
+                  controller: teamName,
+                  maxLength: 60,
+                  validator: requiredText,
+                  decoration: const InputDecoration(labelText: 'Nama tim kamu'),
+                ),
+                const SizedBox(height: 12),
+              ],
               Text(
                 'Berperingkat memerlukan hasil yang dikonfirmasi kedua pihak. Mode uji coba tidak mengubah poin resmi.',
                 style: textStyle(12, color: secondary(context)),
@@ -290,7 +307,15 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
                   owned: true,
                 );
                 try {
-                  await ref.read(localStateProvider.notifier).create(a);
+                  await ref
+                      .read(localStateProvider.notifier)
+                      .create(
+                        a,
+                        teamName:
+                            widget.kind == 'room' && mode == 'Berperingkat'
+                            ? teamName.text
+                            : null,
+                      );
                   if (context.mounted) context.replace('/activity/${a.id}');
                 } catch (_) {
                   if (context.mounted) {

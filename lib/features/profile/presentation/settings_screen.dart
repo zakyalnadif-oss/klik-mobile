@@ -47,7 +47,12 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
         const SectionTitle('Versi aplikasi'),
-        const Text('KLIK 0.4.2 • Uji coba lokal'),
+        const Text('KLIK 0.4.3 • Uji coba lokal'),
+        KButton(
+          'Coba input dua ketua',
+          secondary: true,
+          onPressed: () => context.push('/score-example'),
+        ),
         KButton(
           'Akun dan login',
           secondary: true,

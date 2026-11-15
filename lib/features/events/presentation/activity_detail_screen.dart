@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../../../data/providers/local_state.dart';
+import '../../../data/models/ranked_match.dart';
+import '../../../features/tanding/logic/match_rules.dart';
+import '../../../shared/components/match_result_card.dart';
 import '../../../shared/widgets/klik_ui.dart';
 
 class ActivityDetailScreen extends ConsumerStatefulWidget {
@@ -34,6 +37,9 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
     final a = matches.first,
         joined = (data['joined'] as List).contains(widget.id);
     final result = (data['results'] as Map)[a.id] as Map?;
+    final ranked = MatchRules.rankedRoom(a);
+    final fixture = RankedMatch.read(data, a.id);
+    final captain = MatchRules.isCaptain(data, a.id);
     return KPage(
       title: a.isEvent ? 'Detail Event' : 'Detail Ruang',
       children: [
@@ -97,6 +103,36 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
           'Datang 30 menit sebelum kegiatan. Bawa perlengkapan pribadi. Hormati peserta lain dan keputusan penyelenggara.',
           style: textStyle(13, color: secondary(context)),
         ),
+        if (ranked) ...[
+          const SectionTitle('Tim pertandingan'),
+          KCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  fixture == null
+                      ? 'Tim A belum terdaftar'
+                      : '${fixture.teamA.name} • Ketua: ${fixture.teamA.captainName}',
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  fixture?.teamB == null
+                      ? 'Menunggu tim lawan'
+                      : '${fixture!.teamB!.name} • Ketua: ${fixture.teamB!.captainName}',
+                ),
+              ],
+            ),
+          ),
+          KButton(
+            'Tim dan ketua pertandingan',
+            secondary: true,
+            onPressed: () => context.push('/match-teams/${a.id}'),
+          ),
+          if (fixture?.ready != true)
+            const Text(
+              'Input hasil tersedia setelah kedua ketua terdaftar dan pertandingan selesai.',
+            ),
+        ],
         if (joined)
           KCard(
             child: Column(
@@ -119,22 +155,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
               ],
             ),
           ),
-        if (result != null)
-          KCard(
-            child: Column(
-              children: [
-                Text(
-                  '${result['own']} – ${result['other']}',
-                  style: textStyle(32, weight: FontWeight.w800),
-                ),
-                Text(result['status'] as String),
-                const SizedBox(height: 8),
-                const Text(
-                  'Konfirmasi lawan memerlukan pengguna dan backend yang terhubung. Poin belum berubah.',
-                ),
-              ],
-            ),
-          ),
+        if (result != null) MatchResultCard(result: result, fixture: fixture),
         if (!joined)
           KButton(
             a.remaining == 0
@@ -167,16 +188,22 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                     if (context.mounted) setState(() => busy = false);
                   },
           ),
-        if (joined && a.owned && result == null)
+        if (captain &&
+            result?['status'] != 'Disahkan' &&
+            (result == null || result['schema'] == 2))
           KButton(
-            'Input hasil pertandingan',
+            ((result?['submissions'] as Map?)?.containsKey(
+                      localPlayerId(data),
+                    ) ??
+                    false)
+                ? 'Perbarui skor saya'
+                : 'Input hasil pertandingan',
             onPressed: DateTime.now().isBefore(a.endsAt)
                 ? null
                 : () => context.push('/score/${a.id}'),
           ),
-        if (joined &&
-            a.owned &&
-            result == null &&
+        if (captain &&
+            result?['status'] != 'Disahkan' &&
             DateTime.now().isBefore(a.endsAt))
           Text(
             'Input hasil tersedia setelah ${dayLabel(a.endsAt)} pukul ${timeLabel(a.endsAt)}.',

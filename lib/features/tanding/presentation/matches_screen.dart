@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../data/providers/local_state.dart';
+import '../../../data/models/ranked_match.dart';
+import '../../../shared/components/match_result_card.dart';
 import '../../../shared/components/activity_card.dart';
 import '../../../shared/widgets/klik_ui.dart';
 
@@ -71,9 +73,9 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
           for (final a in shown) ...[
             ActivityCard(a, joined: true),
             if (results[a.id] != null)
-              Text(
-                '${results[a.id]['own']} – ${results[a.id]['other']} • ${results[a.id]['status']}',
-                style: textStyle(12, color: secondary(context)),
+              MatchResultCard(
+                result: results[a.id] as Map,
+                fixture: RankedMatch.read(data, a.id),
               ),
           ],
         ],
