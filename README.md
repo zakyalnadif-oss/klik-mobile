@@ -1,4 +1,4 @@
-# KLIK Mobile — versi uji coba 0.4.2
+# KLIK Mobile — versi uji coba 0.4.3
 
 ## A. Tujuan dan fitur
 
@@ -83,7 +83,7 @@ Unduh artefak APK dari run yang **berhasil**, ekstrak ZIP, lalu pindahkan APK ke
 
 ## H. Pengujian dan kecocokan Figma
 
-Status aktual ada di VALIDATION.md. Analisis kode, 47 pemeriksaan aturan/penyimpanan dan 23 tes konfigurasi/widget/layar telah lulus di GitHub. Pengujian lokal Windows terhalang Application Control; pemeriksaan runtime dilanjutkan di GitHub dengan izin pengguna. Status APK dan pemeriksaan gambar terbaru dicatat di VALIDATION.md.
+Status aktual ada di VALIDATION.md. Analisis kode, 48 pemeriksaan aturan/penyimpanan dan 38 tes konfigurasi/widget/layar telah lulus di GitHub. Pengujian lokal Windows terhalang Application Control; pemeriksaan runtime dilanjutkan di GitHub dengan izin pengguna. Status APK dan pemeriksaan gambar terbaru dicatat di VALIDATION.md.
 
 Beranda dibandingkan dengan konteks Figma yang berhasil dibaca, memakai aset aslinya. Pembacaan layar Figma lain terhenti karena batas penggunaan layanan; sumber Figma yang sudah tersimpan digunakan sebagai referensi tambahan. Seluruh layar belum dapat dinyatakan sama persis dan seluruh bug belum dapat dinyatakan selesai.
 
@@ -108,4 +108,9 @@ Setelah build tersedia, periksa seluruh tab, pencarian, buat/gabung/keluar ruang
 
 Pada pertandingan berbayar, Gabung membuka halaman QR terlebih dahulu. Tekan Konfirmasi pembayaran untuk mencoba pendaftaran. Data kode dan konfirmasi tersimpan lokal pada checkoutPreviews. QR tersebut adalah contoh berisi JSON test_only, bukan kode QRIS untuk menerima uang. Midtrans dan server pembayaran belum terhubung. Tampilan ini tidak diberi tulisan Simulasi; batas teknis tetap dicatat dalam CHANGES-0.4.2.md.
 
+
+
+## Hasil room Berperingkat
+
+Input skor kini hanya diberikan kepada kedua ketua tim terdaftar, setelah pertandingan selesai. Kedua ketua mengisi skor Tim A/Tim B; hasil disahkan jika sama. Room Kasual dan event tidak menyediakan input skor. Untuk mencoba dua ketua pada perangkat ini, buka Profil > Pengaturan > Coba input dua ketua. Ini merupakan alur lokal, bukan sinkronisasi dua akun antar-HP. Baca CARA-UJI-SKOR.md dan CHANGES-0.4.3.md.
 

@@ -1,6 +1,6 @@
-CARA MENCOBA KLIK 0.4.2 DI HP ANDROID
+CARA MENCOBA KLIK 0.4.3 DI HP ANDROID
 
-APK terbaru: KLIK-0.4.2-Testing.apk
+APK terbaru: KLIK-0.4.3-Testing.apk
 
 Untuk contoh alur QRIS:
 1. Buka KLIK dan pilih Coba tanpa akun.
@@ -15,7 +15,10 @@ Untuk event, buka Lihat Acara, kemudian Daftar Event untuk melihat QR. Pertandin
 QR ini hanya untuk contoh tampilan: isinya data JSON, bukan kode QRIS pembayaran bank/dompet digital. Tidak ada uang yang dikirim atau diterima. Konfirmasi dilakukan lokal melalui tombol, bukan pemeriksaan transaksi Midtrans. Tulisan Simulasi tidak ditampilkan pada layar pembayaran.
 
 Pemasangan APK:
-- Pindahkan KLIK-0.4.2-Testing.apk ke HP, lalu buka melalui Files/File Manager dan pilih Instal.
+- Pindahkan KLIK-0.4.3-Testing.apk ke HP, lalu buka melalui Files/File Manager dan pilih Instal.
 - APK uji coba memakai sertifikat sementara. Jika Android menolak pembaruan langsung, aplikasi lama perlu dicopot sebelum memasang versi ini. Pencopotan menghapus data lokal; lakukan hanya jika data percobaan memang boleh dihapus.
 
-Kode sumber berada di folder lib. Buka folder KLIK-Flutter melalui File > Open Folder di VS Code. Catatan versi ini: CHANGES-0.4.2.md. Hasil pemeriksaan: VALIDATION.md.
+Kode sumber berada di folder lib. Buka folder KLIK-Flutter melalui File > Open Folder di VS Code. Catatan versi ini: CHANGES-0.4.3.md. Hasil pemeriksaan: VALIDATION.md.
+
+Untuk mencoba input skor dua ketua: buka Profil > Pengaturan > Coba input dua ketua. Isi 5–3 sebagai Ketua Tim Merah, lalu isi 5–3 sebagai Ketua Tim Biru. Hasil menjadi Disahkan. Skor yang berbeda belum disahkan. Halaman contoh tidak mengubah hasil room kamu. Rincian: CARA-UJI-SKOR.md.
+
