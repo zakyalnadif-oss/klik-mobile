@@ -34,7 +34,35 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
     final incoming = (data['incomingRequests'] as List? ?? []).cast<String>();
     final myPlayerId = data['playerId'] as String?;
 
-    final friendPlayers = people.where((p) => friends.contains(p['id'])).toList();
+    final conversations = ((data['conversations'] as List?) ?? []).cast<Map>();
+    final convMap = <String, Map<String, dynamic>>{};
+    for (final c in conversations) {
+      final pid = c['playerId'] as String?;
+      if (pid != null) convMap[pid] = Map<String, dynamic>.from(c);
+    }
+
+    final friendPlayers = people.where((p) => friends.contains(p['id'])).toList()
+      ..sort((a, b) {
+        final aConv = convMap[a['id']];
+        final bConv = convMap[b['id']];
+        final aUnread = aConv?['unreadCount'] as int? ?? 0;
+        final bUnread = bConv?['unreadCount'] as int? ?? 0;
+
+        // 1. Yang punya unread chat ditaruh paling atas
+        if (aUnread > 0 && bUnread == 0) return -1;
+        if (bUnread > 0 && aUnread == 0) return 1;
+
+        // 2. Jika sama-sama unread atau sama-sama read, urutkan berdasarkan waktu pesan terakhir
+        final aTime = aConv?['lastMessageAt'] as String?;
+        final bTime = bConv?['lastMessageAt'] as String?;
+        if (aTime != null && bTime != null) {
+          return bTime.compareTo(aTime);
+        }
+        if (aTime != null) return -1;
+        if (bTime != null) return 1;
+
+        return (a['name'] as String? ?? '').compareTo(b['name'] as String? ?? '');
+      });
     final nonFriendPlayers = people.where(
       (p) => p['id'] != myPlayerId && !friends.contains(p['id']),
     ).toList();
@@ -82,7 +110,11 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
           if (friendPlayers.isNotEmpty) ...[
             SectionTitle('Teman saya (${friendPlayers.length})'),
             for (final person in friendPlayers)
-              PlayerTile(Map<String, dynamic>.from(person), isFriend: true),
+              PlayerTile(
+                Map<String, dynamic>.from(person),
+                isFriend: true,
+                unreadChatCount: convMap[person['id']]?['unreadCount'] as int? ?? 0,
+              ),
           ] else ...[
             EmptyState(
               'Belum ada teman',
@@ -116,10 +148,16 @@ class _SocialScreenState extends ConsumerState<SocialScreen> {
         ],
         if (tab == 'Komunitas') ...[
           Text(
-            'Komunitas olahraga',
+            'Komunitas Olahraga',
             style: textStyle(18, weight: FontWeight.w700),
           ),
-          for (final sport in sports.take(3)) CommunityTile(sport: sport),
+          const SizedBox(height: 4),
+          Text(
+            'Temukan rekan bermain, info mabar, dan ikuti kegiatan olahraga favoritmu.',
+            style: textStyle(13, color: secondary(context)),
+          ),
+          const SizedBox(height: 12),
+          for (final s in sports) CommunityTile(sport: s),
         ],
         const LocalNotice(),
       ],
@@ -220,9 +258,15 @@ class _IncomingRequestCardState extends ConsumerState<IncomingRequestCard> {
 }
 
 class PlayerTile extends ConsumerStatefulWidget {
-  const PlayerTile(this.person, {this.isFriend = false, super.key});
+  const PlayerTile(
+    this.person, {
+    this.isFriend = false,
+    this.unreadChatCount = 0,
+    super.key,
+  });
   final Map<String, dynamic> person;
   final bool isFriend;
+  final int unreadChatCount;
   @override
   ConsumerState<PlayerTile> createState() => _PlayerTileState();
 }
@@ -269,52 +313,167 @@ class _PlayerTileState extends ConsumerState<PlayerTile> {
                   ],
                 ),
               ),
-              if (isAlreadyFriend)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
+              if (isAlreadyFriend) ...[
+                if (widget.unreadChatCount > 0) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: accent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.mark_chat_unread_rounded,
+                          size: 14,
+                          color: Color(0xFF171B12),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${widget.unreadChatCount} pesan baru',
+                          style: textStyle(
+                            11,
+                            weight: FontWeight.w800,
+                            color: const Color(0xFF171B12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.check, size: 14, color: Color(0xFF171B12)),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Teman',
-                        style: textStyle(12, weight: FontWeight.w700, color: const Color(0xFF171B12)),
-                      ),
-                    ],
+                ] else ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.check, size: 14, color: Color(0xFF171B12)),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Teman',
+                          style: textStyle(12, weight: FontWeight.w700, color: const Color(0xFF171B12)),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
+              ],
             ],
           ),
           const SizedBox(height: 12),
           if (isAlreadyFriend)
-            KButton(
-              'Hapus pertemanan',
-              secondary: true,
-              busy: busy,
-              onPressed: () async {
-                final confirm = await confirmAction(
-                  context,
-                  'Hapus teman?',
-                  'Apakah kamu yakin ingin menghapus ${p['name']} dari daftar teman?',
-                );
-                if (!confirm) return;
-                setState(() => busy = true);
-                if (context.mounted) {
-                  await perform(
-                    context,
-                    () => ref
-                        .read(localStateProvider.notifier)
-                        .removeFriend(p['id'] as String),
-                    success: 'Pertemanan dengan ${p['name']} dihapus.',
-                  );
-                }
-                if (context.mounted) setState(() => busy = false);
-              },
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: SizedBox(
+                    height: 42,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: accent,
+                        foregroundColor: const Color(0xFF171B12),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () {
+                        // Langsung tandai percakapan sebagai sudah dibaca di state lokal
+                        ref
+                            .read(localStateProvider.notifier)
+                            .markConversationRead(p['id'] as String);
+
+                        final q = {
+                          'name': p['name'] as String? ?? 'Teman',
+                          if (p['avatar_url'] != null)
+                            'avatarUrl': p['avatar_url'] as String,
+                          if (p['initials'] != null)
+                            'initials': p['initials'] as String,
+                          if (p['sport'] != null) 'sport': p['sport'] as String,
+                        };
+                        final uri = Uri(
+                          path: '/chat/${p['id']}',
+                          queryParameters: q,
+                        );
+                        context.push(uri.toString());
+                      },
+                      icon: Icon(
+                        widget.unreadChatCount > 0
+                            ? Icons.mark_chat_unread_rounded
+                            : Icons.chat_bubble_outline_rounded,
+                        size: 17,
+                      ),
+                      label: Text(
+                        widget.unreadChatCount > 0 ? 'Balas Chat' : 'Chat Teman',
+                        style: textStyle(13, weight: FontWeight.w700),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: SizedBox(
+                    height: 42,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .error
+                              .withValues(alpha: 0.5),
+                          width: 1,
+                        ),
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: busy
+                          ? null
+                          : () async {
+                              final confirm = await confirmAction(
+                                context,
+                                'Hapus teman?',
+                                'Apakah kamu yakin ingin menghapus ${p['name']} dari daftar teman?',
+                              );
+                              if (!confirm) return;
+                              setState(() => busy = true);
+                              if (context.mounted) {
+                                await perform(
+                                  context,
+                                  () => ref
+                                      .read(localStateProvider.notifier)
+                                      .removeFriend(p['id'] as String),
+                                  success:
+                                      'Pertemanan dengan ${p['name']} dihapus.',
+                                );
+                              }
+                              if (context.mounted) setState(() => busy = false);
+                            },
+                      child: busy
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              'Hapus',
+                              style: textStyle(12, weight: FontWeight.w600),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                    ),
+                  ),
+                ),
+              ],
             )
           else if (incoming)
             Row(
@@ -391,39 +550,248 @@ class CommunityTile extends ConsumerStatefulWidget {
 
 class _CommunityTileState extends ConsumerState<CommunityTile> {
   bool busy = false;
+
+  String _getCommunityDescription(String sport) {
+    switch (sport) {
+      case 'Futsal':
+        return 'Komunitas futsal terbesar untuk mabar rutin, cari lawan sparring, dan turnamen lokal.';
+      case 'Basket':
+        return 'Wadah pecinta bola basket 3x3 maupun 5on5. Rutin main tiap pekan di lapangan terdekat.';
+      case 'Biliar':
+        return 'Kumpulan pemain biliar dari santai hingga kompetitif. Temukan teman main 9-ball & 8-ball.';
+      case 'Voli':
+        return 'Komunitas voli untuk seru-seruan latihan servis, spike, dan laga persahabatan antar tim.';
+      case 'Padel':
+        return 'Komunitas padel tenis yang berkembang pesat. Cocok untuk semua level pemula hingga mahir.';
+      case 'Bulu Tangkis':
+        return 'Klub bulu tangkis aktif. Sewa lapangan bareng, latihan rally, ganda putra/campuran.';
+      case 'Sepak Bola':
+        return 'Komunitas sepak bola 11 vs 11 lapangan besar, info uji tanding dan liga komunitas.';
+      default:
+        return 'Komunitas olahraga untuk terhubung dengan pemain sehobi dan mabar rutin.';
+    }
+  }
+
+  String _getSportIconName(String sport) {
+    final idx = sports.indexOf(sport);
+    if (idx >= 0 && idx < sportIcons.length) {
+      return sportIcons[idx];
+    }
+    return 'football';
+  }
+
   @override
   Widget build(BuildContext context) {
     final joined =
         (ref.watch(localStateProvider).requireValue['communities'] as List)
             .contains(widget.sport);
+    final iconName = _getSportIconName(widget.sport);
+
     return KCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: joined
+                      ? accent.withValues(alpha: 0.15)
+                      : Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: joined
+                        ? accent
+                        : Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Center(
+                  child: FigmaIcon(
+                    iconName,
+                    color: joined
+                        ? accent
+                        : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Komunitas ${widget.sport}',
+                            style: textStyle(16, weight: FontWeight.w700),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (joined) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accent.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Tergabung',
+                              style: textStyle(
+                                10,
+                                weight: FontWeight.w700,
+                                color: accent,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      joined ? 'Status: Anggota Aktif' : 'Status: Terbuka untuk umum',
+                      style: textStyle(11, color: secondary(context)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
           Text(
-            'Komunitas ${widget.sport}',
-            style: textStyle(16, weight: FontWeight.w700),
+            _getCommunityDescription(widget.sport),
+            style: textStyle(12, color: secondary(context)),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Komunitas olahraga untuk mencoba pilihan bergabung. Terhubung dengan pemain sehobi.',
-          ),
-          const SizedBox(height: 16),
-          KButton(
-            joined ? 'Keluar komunitas' : 'Gabung komunitas',
-            secondary: joined,
-            busy: busy,
-            onPressed: () async {
-              setState(() => busy = true);
-              await perform(
-                context,
-                () => ref
-                    .read(localStateProvider.notifier)
-                    .toggleCommunity(widget.sport),
-              );
-              if (context.mounted) setState(() => busy = false);
-            },
-          ),
+          const SizedBox(height: 14),
+          if (joined) ...[
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: SizedBox(
+                    height: 42,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: accent,
+                        foregroundColor: const Color(0xFF171B12),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () => context.push(
+                        '/community-chat?sport=${Uri.encodeComponent(widget.sport)}',
+                      ),
+                      icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
+                      label: Text(
+                        'Chat Grup',
+                        style: textStyle(13, weight: FontWeight.w700),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: SizedBox(
+                    height: 42,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
+                          width: 1,
+                        ),
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: busy
+                          ? null
+                          : () async {
+                              setState(() => busy = true);
+                              await perform(
+                                context,
+                                () => ref
+                                    .read(localStateProvider.notifier)
+                                    .toggleCommunity(widget.sport),
+                                success: 'Anda telah keluar dari Komunitas ${widget.sport}.',
+                              );
+                              if (context.mounted) setState(() => busy = false);
+                            },
+                      child: busy
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              'Keluar',
+                              style: textStyle(12, weight: FontWeight.w600),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            SizedBox(
+              height: 42,
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: const Color(0xFF171B12),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: busy
+                    ? null
+                    : () async {
+                        setState(() => busy = true);
+                        await perform(
+                          context,
+                          () => ref
+                              .read(localStateProvider.notifier)
+                              .toggleCommunity(widget.sport),
+                          success: 'Selamat! Anda resmi bergabung dengan Komunitas ${widget.sport}.',
+                        );
+                        if (context.mounted) {
+                          setState(() => busy = false);
+                          context.push('/community-chat?sport=${Uri.encodeComponent(widget.sport)}');
+                        }
+                      },
+                icon: busy
+                    ? const SizedBox.shrink()
+                    : const Icon(Icons.group_add_rounded, size: 18),
+                label: busy
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        'Gabung Komunitas',
+                        style: textStyle(13, weight: FontWeight.w700),
+                      ),
+              ),
+            ),
+          ],
         ],
       ),
     );

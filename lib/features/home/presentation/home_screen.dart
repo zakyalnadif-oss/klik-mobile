@@ -20,6 +20,34 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String sport = 'Futsal';
+  final ScrollController _sportScrollController = ScrollController();
+  double _sportScrollProgress = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _sportScrollController.addListener(_onSportScroll);
+  }
+
+  void _onSportScroll() {
+    if (_sportScrollController.hasClients &&
+        _sportScrollController.position.maxScrollExtent > 0) {
+      final progress = (_sportScrollController.offset /
+              _sportScrollController.position.maxScrollExtent)
+          .clamp(0.0, 1.0);
+      if ((progress - _sportScrollProgress).abs() > 0.01) {
+        setState(() => _sportScrollProgress = progress);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _sportScrollController.removeListener(_onSportScroll);
+    _sportScrollController.dispose();
+    super.dispose();
+  }
+
   Widget locationLink(BuildContext context, String city) => InkWell(
     onTap: () => context.push('/edit-profile'),
     child: Row(
@@ -36,85 +64,150 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ],
     ),
   );
-  Widget sportSelector(BuildContext context) => SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      children: List.generate(
-        sports.length,
-        (i) => Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: Semantics(
-            selected: sport == sports[i],
-            button: true,
-            child: InkWell(
-              onTap: () => setState(() => sport = sports[i]),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: (MediaQuery.sizeOf(context).width - 68) / 3,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 5,
-                  vertical: 12,
+
+  Widget sportSelector(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    // Tampilkan 3 kartu penuh dan kartu ke-4 sedikit mengintip (~35%) di sisi kanan
+    final cardWidth = math.max(92.0, (screenWidth - 48 - 25) / 3.35);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SingleChildScrollView(
+          controller: _sportScrollController,
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          clipBehavior: Clip.none,
+          child: Row(
+            children: List.generate(
+              sports.length,
+              (i) => Padding(
+                padding: EdgeInsets.only(
+                  right: i == sports.length - 1 ? 0 : 10,
                 ),
-                decoration: BoxDecoration(
-                  color: sport == sports[i]
-                      ? accent
-                      : Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 23,
-                      child: Center(
-                        child: sportIcons[i] == 'padel'
-                            ? SizedBox(
-                                width: 23,
-                                height: 23,
-                                child: ClipRect(
-                                  child: Center(
-                                    child: Transform.rotate(
-                                      angle: 38 * math.pi / 180,
-                                      child: FigmaIcon(
-                                        'padel',
-                                        color: sport == sports[i]
-                                            ? Colors.white
-                                            : Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : FigmaIcon(
-                                sportIcons[i],
-                                color: sport == sports[i]
-                                    ? Colors.white
-                                    : Theme.of(context).colorScheme.onSurface,
+                child: Semantics(
+                  selected: sport == sports[i],
+                  button: true,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() => sport = sports[i]);
+                      if (_sportScrollController.hasClients &&
+                          _sportScrollController.position.maxScrollExtent > 0) {
+                        final targetOffset = (i * (cardWidth + 10))
+                            .clamp(0.0, _sportScrollController.position.maxScrollExtent);
+                        _sportScrollController.animateTo(
+                          targetOffset,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOutCubic,
+                        );
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      width: cardWidth,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: sport == sports[i]
+                            ? accent
+                            : Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: sport == sports[i]
+                            ? null
+                            : Border.all(
+                                color: Theme.of(context)
+                                    .dividerColor
+                                    .withValues(alpha: 0.15),
+                                width: 1,
                               ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      sports[i],
-                      textAlign: TextAlign.center,
-                      style: textStyle(
-                        12,
-                        weight: FontWeight.w600,
-                        color: sport == sports[i]
-                            ? const Color(0xFF171B12)
-                            : null,
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 23,
+                            child: Center(
+                              child: sportIcons[i] == 'padel'
+                                  ? SizedBox(
+                                      width: 23,
+                                      height: 23,
+                                      child: ClipRect(
+                                        child: Center(
+                                          child: Transform.rotate(
+                                            angle: 38 * math.pi / 180,
+                                            child: FigmaIcon(
+                                              'padel',
+                                              color: sport == sports[i]
+                                                  ? Colors.white
+                                                  : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : FigmaIcon(
+                                      sportIcons[i],
+                                      color: sport == sports[i]
+                                          ? Colors.white
+                                          : Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            sports[i],
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textStyle(
+                              12,
+                              weight: FontWeight.w600,
+                              color: sport == sports[i]
+                                  ? const Color(0xFF171B12)
+                                  : null,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    ),
-  );
+        const SizedBox(height: 8),
+        Center(
+          child: Container(
+            width: 44,
+            height: 3.5,
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2E)
+                  : const Color(0xFFE2DDD5),
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: Align(
+              alignment: Alignment(-1.0 + (_sportScrollProgress * 2.0), 0.0),
+              child: Container(
+                width: 18,
+                height: 3.5,
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(localStateProvider).requireValue;

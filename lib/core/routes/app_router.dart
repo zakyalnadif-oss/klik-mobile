@@ -23,6 +23,8 @@ import '../../features/tanding/presentation/score_example_screen.dart';
 import '../../features/venues/presentation/venue_screen.dart';
 import '../../features/leaderboard/presentation/leaderboard_screen.dart';
 import '../../features/payments/presentation/checkout_screen.dart';
+import '../../features/social/presentation/community_chat_screen.dart';
+import '../../features/social/presentation/direct_chat_screen.dart';
 import '../../shared/components/app_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -128,6 +130,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/notifications',
         builder: (c, s) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/community-chat/:sport',
+        builder: (c, s) {
+          final rawSport = s.pathParameters['sport'] ?? 'Futsal';
+          return CommunityChatScreen(
+            sport: Uri.decodeComponent(rawSport),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/community-chat',
+        builder: (c, s) {
+          final sport = s.uri.queryParameters['sport'] ?? 'Futsal';
+          return CommunityChatScreen(sport: sport);
+        },
+      ),
+      GoRoute(
+        path: '/chat/:friendId',
+        builder: (c, s) {
+          final friendId = s.pathParameters['friendId']!;
+          final q = s.uri.queryParameters;
+          return DirectChatScreen(
+            friendId: friendId,
+            friendName: q['name'] ?? 'Teman',
+            friendAvatarUrl: q['avatarUrl'],
+            friendInitials: q['initials'],
+            friendSport: q['sport'],
+          );
+        },
       ),
     ],
     errorBuilder: (c, s) => Scaffold(

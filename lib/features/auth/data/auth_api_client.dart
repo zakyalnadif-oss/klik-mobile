@@ -109,6 +109,48 @@ class AuthApiClient {
     return null;
   }
 
+  /// Create or fetch checkout order from server.
+  Future<Map<String, dynamic>?> getCheckout(String activityId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/checkout/$activityId'),
+        headers: _headers,
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// Confirm payment of an order via reference.
+  Future<Map<String, dynamic>?> confirmCheckout(String reference) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/api/checkout/$reference/confirm'),
+        headers: _headers,
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// Check payment status of an order via reference.
+  Future<Map<String, dynamic>?> checkPaymentStatus(String reference) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/checkout/$reference/status'),
+        headers: _headers,
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+    } catch (_) {}
+    return null;
+  }
+
   /// Send a friend request to another player.
   Future<void> sendFriendRequest(String targetPlayerId) async {
     final response = await http.post(
@@ -222,6 +264,88 @@ class AuthApiClient {
         headers: _headers,
       );
     } catch (_) {}
+  }
+
+  /// Join a sports community.
+  Future<void> joinCommunity(String sport) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/communities/join'),
+      headers: _headers,
+      body: jsonEncode({'sport': sport}),
+    );
+    if (response.statusCode != 200) {
+      try {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        throw StateError(data['error'] as String? ?? 'Gagal bergabung ke komunitas.');
+      } catch (e) {
+        if (e is StateError) rethrow;
+        throw StateError('Gagal bergabung ke komunitas.');
+      }
+    }
+  }
+
+  /// Leave a sports community.
+  Future<void> leaveCommunity(String sport) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/communities/leave'),
+      headers: _headers,
+      body: jsonEncode({'sport': sport}),
+    );
+    if (response.statusCode != 200) {
+      try {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        throw StateError(data['error'] as String? ?? 'Gagal keluar dari komunitas.');
+      } catch (e) {
+        if (e is StateError) rethrow;
+        throw StateError('Gagal keluar dari komunitas.');
+      }
+    }
+  }
+
+  /// Get direct chat messages with a friend.
+  Future<List<Map<String, dynamic>>> getDirectMessages(String targetPlayerId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/messages/$targetPlayerId'),
+        headers: _headers,
+      );
+      if (response.statusCode == 200) {
+        final list = jsonDecode(response.body) as List;
+        return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  /// Send direct chat message to a friend.
+  Future<Map<String, dynamic>?> sendDirectMessage(
+    String targetPlayerId,
+    String message,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/messages/$targetPlayerId'),
+      headers: _headers,
+      body: jsonEncode({'message': message}),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    return null;
+  }
+
+  /// Get conversation metadata (unread counts, lastMessageAt)
+  Future<List<Map<String, dynamic>>> getConversations() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/messages/conversations'),
+        headers: _headers,
+      );
+      if (response.statusCode == 200) {
+        final list = jsonDecode(response.body) as List;
+        return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      }
+    } catch (_) {}
+    return [];
   }
 
   /// Clear local token (logout).

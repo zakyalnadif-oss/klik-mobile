@@ -72,6 +72,14 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
           .map((n) => Map<String, dynamic>.from(n as Map))
           .toList();
     }
+    if (syncData['communities'] is List) {
+      j['communities'] = (syncData['communities'] as List).cast<String>().toSet().toList();
+    }
+    if (syncData['conversations'] is List) {
+      j['conversations'] = (syncData['conversations'] as List)
+          .map((c) => Map<String, dynamic>.from(c as Map))
+          .toList();
+    }
     final user = syncData['user'];
     if (user is Map) {
       if (user['display_name'] != null && (user['display_name'] as String).isNotEmpty) {
@@ -111,10 +119,38 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
       });
   Future<void> join(String id) =>
       change((j) => ActivityRules.join(j, id, DateTime.now()));
-  Future<void> openCheckout(String id) =>
-      change((j) => CheckoutRules.open(j, id, DateTime.now()));
-  Future<void> confirmCheckout(String id, String reference) =>
-      change((j) => CheckoutRules.confirm(j, id, reference, DateTime.now()));
+  Future<void> openCheckout(String id) async {
+    final api = ref.read(authApiClientProvider);
+    final serverOrder = await api.getCheckout(id);
+
+    await change((j) {
+      CheckoutRules.open(j, id, DateTime.now());
+      if (serverOrder != null && serverOrder['reference'] != null) {
+        final existing = (j['checkoutPreviews'] as Map?)?[id] as Map?;
+        if (existing != null) {
+          existing['reference'] = serverOrder['reference'];
+          if (serverOrder['amount'] != null) {
+            existing['amount'] = serverOrder['amount'];
+          }
+          if (serverOrder['qrPayload'] != null) {
+            existing['qrPayload'] = serverOrder['qrPayload'];
+          }
+          if (serverOrder['expiresAt'] != null) {
+            existing['expiresAt'] = serverOrder['expiresAt'];
+          }
+        }
+      }
+    });
+  }
+
+  Future<void> confirmCheckout(String id, String reference) async {
+    final api = ref.read(authApiClientProvider);
+    await api.confirmCheckout(reference);
+
+    await change((j) {
+      CheckoutRules.confirm(j, id, reference, DateTime.now());
+    });
+  }
   Future<void> cancelCheckout(String id) =>
       change((j) => CheckoutRules.cancel(j, id));
   Future<void> leave(String id) => change((j) => ActivityRules.leave(j, id));
@@ -251,6 +287,17 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
     });
   }
 
+  Future<void> markConversationRead(String friendPlayerId) => change((j) {
+    final convs = j['conversations'] as List?;
+    if (convs != null) {
+      for (final c in convs) {
+        if (c is Map && c['playerId'] == friendPlayerId) {
+          c['unreadCount'] = 0;
+        }
+      }
+    }
+  });
+
   Future<void> refreshSync() async {
     try {
       final api = ref.read(authApiClientProvider);
@@ -260,13 +307,33 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
       }
     } catch (_) {}
   }
-  Future<void> toggleCommunity(String sport) => change((j) {
+  Future<void> toggleCommunity(String sport) async {
     if (!LocalRecord.sports.contains(sport)) {
       throw ArgumentError('Olahraga tidak valid.');
     }
-    final list = j['communities'] as List;
-    list.contains(sport) ? list.remove(sport) : list.add(sport);
-  });
+    final currentState = state.value;
+    final list = (currentState?['communities'] as List?)?.cast<String>() ?? [];
+    final isJoined = list.contains(sport);
+
+    // Kirim request ke backend PostgreSQL
+    try {
+      final api = ref.read(authApiClientProvider);
+      if (isJoined) {
+        await api.leaveCommunity(sport);
+      } else {
+        await api.joinCommunity(sport);
+      }
+    } catch (_) {}
+
+    await change((j) {
+      final comms = j['communities'] as List;
+      if (comms.contains(sport)) {
+        comms.remove(sport);
+      } else {
+        comms.add(sport);
+      }
+    });
+  }
   Future<void> submitScore(String id, int own, int other) =>
       change((j) => MatchRules.submit(j, id, own, other, DateTime.now()));
 }
