@@ -8,3 +8,5 @@ dependencies:
   shelf_router: ^1.1.0
   postgres: ^3.5.5
   dart_jsonwebtoken: ^2.14.1
+  crypto: ^3.0.8
+  mailer: ^7.3.0

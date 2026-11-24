@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
   email         VARCHAR(255) UNIQUE NOT NULL,
   password      VARCHAR(255) NOT NULL,
   display_name  VARCHAR(100),
+  avatar_url    TEXT,
   city          VARCHAR(80) DEFAULT 'Jakarta Selatan',
   sport         VARCHAR(50) DEFAULT 'Futsal',
   level         VARCHAR(20) DEFAULT 'Menengah' CHECK (level IN ('Pemula','Menengah','Mahir')),
@@ -34,7 +35,10 @@ CREATE TABLE IF NOT EXISTS venues (
   name        VARCHAR(200) UNIQUE NOT NULL,
   sport       VARCHAR(50) NOT NULL,
   address     VARCHAR(300) NOT NULL,
-  description TEXT DEFAULT ''
+  description TEXT DEFAULT '',
+  latitude DOUBLE PRECISION CHECK (latitude BETWEEN -90 AND 90),
+  longitude DOUBLE PRECISION CHECK (longitude BETWEEN -180 AND 180),
+  owner_user_id INT REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- 4. ACTIVITIES (room & event)
@@ -44,6 +48,7 @@ CREATE TABLE IF NOT EXISTS activities (
   title             VARCHAR(80) NOT NULL,
   sport             VARCHAR(50) NOT NULL,
   venue             VARCHAR(200) NOT NULL,
+  venue_id          INT REFERENCES venues(id) ON DELETE SET NULL,
   city              VARCHAR(80) NOT NULL,
   mode              VARCHAR(20) NOT NULL CHECK (mode IN ('Kasual','Berperingkat')),
   starts_at         TIMESTAMP NOT NULL,
@@ -161,8 +166,77 @@ CREATE TABLE IF NOT EXISTS notifications (
   title       VARCHAR(200) NOT NULL,
   body        TEXT DEFAULT '',
   is_read     BOOLEAN DEFAULT FALSE,
+  type        VARCHAR(40) NOT NULL DEFAULT 'general',
+  action_id   VARCHAR(100),
   created_at  TIMESTAMP DEFAULT NOW()
 );
+
+-- Password reset tokens are stored as hashes and expire quickly.
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id          BIGSERIAL PRIMARY KEY,
+  user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash  CHAR(64) NOT NULL UNIQUE,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  used_at     TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_password_reset_user_expiry
+  ON password_reset_tokens(user_id, expires_at);
+
+CREATE TABLE IF NOT EXISTS device_push_tokens (
+  id          BIGSERIAL PRIMARY KEY,
+  user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token       TEXT NOT NULL UNIQUE,
+  platform    VARCHAR(20) NOT NULL,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_device_push_user ON device_push_tokens(user_id);
+
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+CREATE TABLE IF NOT EXISTS venue_bookings (
+  id          BIGSERIAL PRIMARY KEY,
+  venue_id    INT NOT NULL REFERENCES venues(id) ON DELETE CASCADE,
+  user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  starts_at   TIMESTAMPTZ NOT NULL,
+  ends_at     TIMESTAMPTZ NOT NULL,
+  status      VARCHAR(20) NOT NULL DEFAULT 'pending'
+              CHECK (status IN ('pending','confirmed','rejected','cancelled')),
+  notes       TEXT NOT NULL DEFAULT '',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CHECK (ends_at > starts_at),
+  EXCLUDE USING gist (
+    venue_id WITH =,
+    tstzrange(starts_at, ends_at, '[)') WITH &&
+  ) WHERE (status IN ('pending','confirmed'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_venue_bookings_time
+  ON venue_bookings(venue_id, starts_at, ends_at)
+  WHERE status IN ('pending','confirmed');
+
+-- Idempotent upgrades for databases created by earlier app versions.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS owner_user_id INT REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS venue_id INT REFERENCES venues(id) ON DELETE SET NULL;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS type VARCHAR(40) NOT NULL DEFAULT 'general';
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS action_id VARCHAR(100);
+
+UPDATE activities a SET venue_id = v.id
+FROM venues v WHERE a.venue_id IS NULL AND LOWER(a.venue) = LOWER(v.name);
+
+DO $$
+BEGIN
+  ALTER TABLE venue_bookings ADD CONSTRAINT venue_bookings_no_overlap EXCLUDE USING gist (
+    venue_id WITH =,
+    tstzrange(starts_at, ends_at, '[)') WITH &&
+  ) WHERE (status IN ('pending','confirmed'));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ============================================================
 -- INDEXES untuk performa query
