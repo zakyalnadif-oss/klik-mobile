@@ -3,6 +3,6 @@
   "configurations": [
     {"name": "KLIK · Uji coba", "request": "launch", "type": "dart", "program": "lib/main.dart"},
     {"name": "KLIK · Chrome", "request": "launch", "type": "dart", "program": "lib/main.dart", "deviceId":"chrome", "toolArgs": ["--web-hostname=127.0.0.1", "--web-port=7357"]},
-    {"name": "KLIK · Supabase", "request": "launch", "type": "dart", "program": "lib/main.dart", "toolArgs": ["--dart-define-from-file=config.local.json"]}
+    {"name": "KLIK · PostgreSQL", "request": "launch", "type": "dart", "program": "lib/main.dart", "toolArgs": ["--dart-define-from-file=config.local.json"]}
   ]
 }

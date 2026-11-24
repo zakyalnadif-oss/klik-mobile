@@ -54,6 +54,16 @@ abstract final class LocalRecord {
           throw const FormatException();
         }
       }
+      if (data['incomingRequests'] != null) {
+        final values = data['incomingRequests'] as List;
+        if (values.any((v) => v is! String) ||
+            values.toSet().length != values.length) {
+          throw const FormatException();
+        }
+      }
+      if (data['notifications'] != null && data['notifications'] is! List) {
+        throw const FormatException();
+      }
       if ((data['joined'] as List).any((id) => !ids.contains(id))) {
         throw const FormatException();
       }

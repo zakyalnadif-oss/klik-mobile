@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../../../data/providers/backend_provider.dart';
@@ -35,14 +34,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Widget build(BuildContext context) {
     final configured = !ref.watch(appConfigProvider).isMissing;
     final register = widget.mode == 'register', reset = widget.mode == 'reset';
-    final user = ref.watch(sessionProvider).asData?.value;
+    final user = ref.watch(sessionProvider);
     if (user != null && !register && !reset) {
       return KPage(
         title: 'Akun',
         children: [
-          KCard(child: Text('Masuk sebagai ${user.email ?? user.id}')),
+          KCard(child: Text('Masuk sebagai ${user['email'] ?? user['id']}')),
           const Text(
-            'Sesi akun dikelola Supabase. Data kegiatan pada versi ini tetap berupa uji coba lokal.',
+            'Akun terhubung ke server KLIK dan tersinkronisasi secara real-time.',
           ),
           KButton(
             'Kembali ke Beranda',
@@ -80,7 +79,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         if (!configured)
           const KCard(
             child: Text(
-              'Akun online belum tersedia karena proyek Supabase belum dihubungkan. Kamu tetap bisa mencoba kegiatan melalui “Coba tanpa akun”.',
+              'Akun online belum tersedia karena server API belum dihubungkan. Kamu tetap bisa mencoba kegiatan melalui "Coba tanpa akun".',
             ),
           ),
         Form(
@@ -167,49 +166,48 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     notice = null;
                   });
                   try {
-                    final client = await ref.read(backendProvider.future);
-                    if (client == null) {
-                      throw StateError('Supabase belum dikonfigurasi.');
-                    }
+                    final api = ref.read(authApiClientProvider);
                     if (reset) {
-                      await client.auth.resetPasswordForEmail(
-                        email.text.trim(),
-                      );
+                      // TODO: implement reset password endpoint
                       if (context.mounted) {
                         setState(
                           () => notice = 'Jika email terdaftar, petunjuk pemulihan akan dikirim ke kotak masuk.',
                         );
                       }
                     } else if (register) {
-                      final response = await client.auth.signUp(
+                      final userData = await api.register(
                         email: email.text.trim(),
                         password: password.text,
-                        data: {'display_name': name.text.trim()},
+                        displayName: name.text.trim(),
                       );
-                      if (response.session == null) {
-                        if (context.mounted) {
-                          setState(
-                            () => notice = 'Periksa email untuk mengonfirmasi pendaftaran, kemudian masuk kembali.',
-                          );
-                        }
-                      } else {
-                        await ref.read(localStateProvider.notifier).start();
-                        if (context.mounted) context.go('/');
+                      ref.read(sessionProvider.notifier).state = userData;
+                      final syncData = await api.fetchSync();
+                      if (syncData != null) {
+                        await ref.read(localStateProvider.notifier).syncWithServer(syncData);
                       }
+                      await ref.read(localStateProvider.notifier).start();
+                      if (context.mounted) context.go('/');
                     } else {
-                      await client.auth.signInWithPassword(
+                      final userData = await api.login(
                         email: email.text.trim(),
                         password: password.text,
                       );
+                      ref.read(sessionProvider.notifier).state = userData;
+                      final syncData = await api.fetchSync();
+                      if (syncData != null) {
+                        await ref.read(localStateProvider.notifier).syncWithServer(syncData);
+                      }
                       await ref.read(localStateProvider.notifier).start();
                       if (context.mounted) context.go('/');
                     }
-                  } on AuthException catch (e) {
-                    if (context.mounted) setState(() => error = e.message);
+                  } on Exception catch (e) {
+                    if (context.mounted) {
+                      setState(() => error = e.toString().replaceFirst('Exception: ', ''));
+                    }
                   } catch (_) {
                     if (context.mounted) {
                       setState(
-                        () => error = 'Akun belum dapat dihubungkan. Periksa koneksi dan konfigurasi proyek.',
+                        () => error = 'Akun belum dapat dihubungkan. Periksa koneksi dan server API.',
                       );
                     }
                   } finally {
@@ -228,6 +226,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           onPressed: busy
               ? null
               : () async {
+                  final api = ref.read(authApiClientProvider);
+                  final syncData = await api.fetchSync();
+                  if (syncData != null) {
+                    await ref.read(localStateProvider.notifier).syncWithServer(syncData);
+                  }
+                  if (!context.mounted) return;
                   await perform(
                     context,
                     () => ref.read(localStateProvider.notifier).start(),

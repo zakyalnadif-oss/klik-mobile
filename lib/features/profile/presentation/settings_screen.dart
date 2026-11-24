@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/theme_controller.dart';
-import '../../../data/providers/backend_provider.dart';
 import '../../../data/providers/local_state.dart';
 import '../../../shared/widgets/klik_ui.dart';
+import '../../auth/logic/session_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -70,8 +70,9 @@ class SettingsScreen extends ConsumerWidget {
               return;
             }
             try {
-              final client = await ref.read(backendProvider.future);
-              if (client != null) await client.auth.signOut();
+              // Clear API token and local session
+              ref.read(authApiClientProvider).logout();
+              ref.read(sessionProvider.notifier).state = null;
               await ref
                   .read(localStateProvider.notifier)
                   .change((j) => j['onboarded'] = false);

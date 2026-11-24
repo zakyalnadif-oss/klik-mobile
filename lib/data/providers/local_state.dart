@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/auth/logic/session_provider.dart';
 import '../../features/events/logic/activity_rules.dart';
 import '../../features/tanding/logic/match_rules.dart';
 import '../../features/payments/logic/checkout_rules.dart';
@@ -27,6 +28,69 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
       commit: (next) => state = AsyncData(next),
     );
   }
+
+  Future<void> syncWithServer(Map<String, dynamic> syncData) => change((j) {
+    if (syncData['activities'] is List && (syncData['activities'] as List).isNotEmpty) {
+      j['activities'] = (syncData['activities'] as List)
+          .map((a) => Map<String, dynamic>.from(a as Map))
+          .toList();
+    }
+    if (syncData['players'] is List && (syncData['players'] as List).isNotEmpty) {
+      j['players'] = (syncData['players'] as List)
+          .map((p) => Map<String, dynamic>.from(p as Map))
+          .toList();
+    }
+    if (syncData['venues'] is List && (syncData['venues'] as List).isNotEmpty) {
+      j['venues'] = (syncData['venues'] as List)
+          .map((v) => Map<String, dynamic>.from(v as Map))
+          .toList();
+    }
+    if (syncData['rankings'] is List && (syncData['rankings'] as List).isNotEmpty) {
+      j['rankings'] = (syncData['rankings'] as List)
+          .map((r) => Map<String, dynamic>.from(r as Map))
+          .toList();
+    }
+    if (syncData['joined'] is List) {
+      final joinedList = (syncData['joined'] as List).cast<String>().toList();
+      for (final id in joinedList) {
+        if (!(j['joined'] as List).contains(id)) {
+          (j['joined'] as List).add(id);
+        }
+      }
+    }
+    if (syncData['friends'] is List) {
+      j['friends'] = (syncData['friends'] as List).cast<String>().toSet().toList();
+    }
+    if (syncData['requested'] is List) {
+      j['requested'] = (syncData['requested'] as List).cast<String>().toSet().toList();
+    }
+    if (syncData['incomingRequests'] is List) {
+      j['incomingRequests'] = (syncData['incomingRequests'] as List).cast<String>().toSet().toList();
+    }
+    if (syncData['notifications'] is List) {
+      j['notifications'] = (syncData['notifications'] as List)
+          .map((n) => Map<String, dynamic>.from(n as Map))
+          .toList();
+    }
+    final user = syncData['user'];
+    if (user is Map) {
+      if (user['display_name'] != null && (user['display_name'] as String).isNotEmpty) {
+        j['name'] = user['display_name'];
+      }
+      if (user['city'] != null && (user['city'] as String).isNotEmpty) {
+        j['city'] = user['city'];
+      }
+      if (user['sport'] != null && (user['sport'] as String).isNotEmpty) {
+        j['sport'] = user['sport'];
+      }
+      if (user['level'] != null && (user['level'] as String).isNotEmpty) {
+        j['level'] = user['level'];
+      }
+      if (user['playerId'] != null && (user['playerId'] as String).isNotEmpty) {
+        j['playerId'] = user['playerId'];
+      }
+    }
+  });
 
   Future<void> start() => change((j) => j['onboarded'] = true);
   Future<void> profile(String name, String city, String sport, String level) =>
@@ -68,16 +132,103 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
   });
   Future<void> registerMatchTeam(String id, String name) =>
       change((j) => MatchRules.registerTeam(j, id, name, DateTime.now()));
-  Future<void> requestFriend(String id) => change((j) {
-    if (!(j['players'] as List).any((p) => p['id'] == id)) {
-      throw StateError('Pemain tidak ditemukan.');
+  Future<void> requestFriend(String id) async {
+    final isRequested = (state.requireValue['requested'] as List).contains(id);
+    final api = ref.read(authApiClientProvider);
+    if (isRequested) {
+      await api.cancelFriendRequest(id);
+      await change((j) {
+        (j['requested'] as List).remove(id);
+      });
+    } else {
+      await api.sendFriendRequest(id);
+      await change((j) {
+        if (!(j['players'] as List).any((p) => p['id'] == id)) {
+          throw StateError('Pemain tidak ditemukan.');
+        }
+        if ((j['friends'] as List).contains(id)) {
+          return;
+        }
+        final requested = j['requested'] as List;
+        if (!requested.contains(id)) requested.add(id);
+      });
     }
-    if ((j['friends'] as List).contains(id)) {
-      return;
+  }
+
+  Future<void> acceptFriend(String id) async {
+    final api = ref.read(authApiClientProvider);
+    await api.acceptFriendRequest(id);
+    await change((j) {
+      final inc = j['incomingRequests'] as List? ?? [];
+      inc.remove(id);
+      j['incomingRequests'] = inc;
+
+      final friends = j['friends'] as List;
+      if (!friends.contains(id)) friends.add(id);
+
+      (j['requested'] as List).remove(id);
+
+      // Find player name for local notification
+      final matches = (j['players'] as List).cast<Map>().where((p) => p['id'] == id);
+      final playerName = matches.isNotEmpty ? (matches.first['name'] as String? ?? id) : id;
+
+      final notifs = (j['notifications'] as List? ?? []).toList();
+      notifs.insert(0, {
+        'id': DateTime.now().millisecondsSinceEpoch,
+        'title': 'Pertemanan Diterima',
+        'body': 'Kamu sekarang berteman dengan $playerName!',
+        'isRead': false,
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+      });
+      j['notifications'] = notifs;
+    });
+  }
+
+  Future<void> rejectFriend(String id) async {
+    final api = ref.read(authApiClientProvider);
+    await api.rejectFriendRequest(id);
+    await change((j) {
+      final inc = j['incomingRequests'] as List? ?? [];
+      inc.remove(id);
+      j['incomingRequests'] = inc;
+    });
+  }
+
+  Future<void> removeFriend(String id) async {
+    final api = ref.read(authApiClientProvider);
+    await api.removeFriend(id);
+    await change((j) {
+      (j['friends'] as List).remove(id);
+    });
+  }
+
+  Future<void> markNotificationRead(dynamic id) async {
+    final intId = id is int ? id : int.tryParse(id.toString());
+    if (intId != null) {
+      final api = ref.read(authApiClientProvider);
+      await api.markNotificationRead(intId);
     }
-    final requested = j['requested'] as List;
-    requested.contains(id) ? requested.remove(id) : requested.add(id);
-  });
+    await change((j) {
+      final notifs = (j['notifications'] as List? ?? []).map((n) {
+        final map = Map<String, dynamic>.from(n as Map);
+        if (map['id'] == id || map['id'] == intId) {
+          map['isRead'] = true;
+        }
+        return map;
+      }).toList();
+      j['notifications'] = notifs;
+    });
+  }
+
+  Future<void> refreshSync() async {
+    try {
+      final api = ref.read(authApiClientProvider);
+      final syncData = await api.fetchSync();
+      if (syncData != null) {
+        await syncWithServer(syncData);
+      }
+    } catch (_) {}
+  }
   Future<void> toggleCommunity(String sport) => change((j) {
     if (!LocalRecord.sports.contains(sport)) {
       throw ArgumentError('Olahraga tidak valid.');

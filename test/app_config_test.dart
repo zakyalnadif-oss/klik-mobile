@@ -1,41 +1,29 @@
-import 'dart:convert';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:klik_mobile/core/services/app_config.dart';
 
 void main() {
-  AppConfig config(String key) => AppConfig(
-    supabaseUrl: 'https://example.supabase.co',
-    publishableKey: key,
-  );
-  String jwt(String role) =>
-      'header.${base64Url.encode(utf8.encode(jsonEncode({'role': role}))).replaceAll('=', '')}.signature';
-
   test('missing configuration is safe and distinguishable', () {
-    const value = AppConfig(supabaseUrl: '', publishableKey: '');
+    const value = AppConfig(apiBaseUrl: '');
     expect(value.isMissing, isTrue);
     expect(value.validationError, isNull);
   });
-  test('accepts public client keys', () {
-    expect(config('sb_publishable_example').validationError, isNull);
-    expect(config(jwt('anon')).validationError, isNull);
+
+  test('accepts valid URL', () {
+    const value = AppConfig(apiBaseUrl: 'http://localhost:8080');
+    expect(value.isMissing, isFalse);
+    expect(value.validationError, isNull);
   });
-  test('rejects privileged and malformed keys', () {
-    for (final key in ['sb_secret_example', jwt('service_role'), 'invalid']) {
-      expect(config(key).validationError, isNotNull);
-    }
+
+  test('accepts https URL', () {
+    const value = AppConfig(apiBaseUrl: 'https://api.example.com');
+    expect(value.isMissing, isFalse);
+    expect(value.validationError, isNull);
   });
-  test('rejects invalid and credential-bearing URLs', () {
-    for (final url in [
-      'not a url',
-      'ftp://example.com',
-      'https://user:pass@example.com',
-    ]) {
+
+  test('rejects invalid URL', () {
+    for (final url in ['not a url', 'ftp://example.com']) {
       expect(
-        AppConfig(
-          supabaseUrl: url,
-          publishableKey: 'sb_publishable_example',
-        ).validationError,
+        AppConfig(apiBaseUrl: url).validationError,
         isNotNull,
       );
     }

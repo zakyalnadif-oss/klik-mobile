@@ -9,4 +9,4 @@
 
 Pemeriksaan: analisis kode tanpa masalah; 47 pemeriksaan aturan/penyimpanan serta 12 tes konfigurasi, navigasi, kegagalan penyimpanan, tata letak dan pengiriman skor lulus. Tiga tes tambahan memeriksa kesamaan ukuran kartu, perataan tombol/label dan teks 200%. Gambar layar utama terang/gelap ditinjau. Hasil ini tidak menjamin seluruh bug pada seluruh perangkat telah ditemukan.
 
-Data uji coba menggunakan penyimpanan lokal. Pengujian server Supabase dan multi-pengguna memerlukan proyek Supabase yang belum tersedia.
+Data uji coba menggunakan penyimpanan lokal. Pengujian server PostgreSQL dan multi-pengguna memerlukan database PostgreSQL yang belum tersedia.

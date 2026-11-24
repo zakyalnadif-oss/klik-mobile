@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../data/providers/backend_provider.dart';
-import '../data/session_repository.dart';
+import '../data/auth_api_client.dart';
 
-final sessionProvider = StreamProvider<User?>((ref) async* {
-  final client = await ref.watch(backendProvider.future);
-  if (client == null) {
-    yield null;
-    return;
-  }
-  yield* SessionRepository(client).watchUser();
+/// Holds the currently logged-in user data (map) or null.
+final sessionProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
+
+/// Provides the AuthApiClient singleton.
+final authApiClientProvider = Provider<AuthApiClient>((ref) {
+  final config = ref.watch(appConfigProvider);
+  return AuthApiClient(config.apiBaseUrl);
 });

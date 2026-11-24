@@ -72,7 +72,7 @@ class _TeamScreenState extends ConsumerState<TeamScreen> {
               ),
               const SizedBox(height: 12),
               const Text(
-                '1 anggota lokal. Undangan dan penerimaan anggota lain memerlukan Supabase yang terhubung. Tim belum dapat mengikuti pertandingan resmi.',
+                '1 anggota lokal. Undangan dan penerimaan anggota lain memerlukan database PostgreSQL yang terhubung. Tim belum dapat mengikuti pertandingan resmi.',
               ),
             ],
           ),

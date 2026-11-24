@@ -6,7 +6,7 @@ Aplikasi Flutter/Dart untuk mencoba alur KLIK di Android atau Chrome. Lima tab u
 
 Versi ini menyediakan pencarian kegiatan/rekan/lapangan, detail kegiatan, gabung dan keluar ruang, pembuatan ruang/acara, perubahan profil, pilihan tema yang tersimpan, komunitas lokal, dan pengajuan skor dengan status menunggu konfirmasi. Data contoh dan peringkat contoh diberi penjelasan di aplikasi.
 
-Belum tersedia sinkronisasi antarpengguna, pengiriman permintaan teman sungguhan, konfirmasi skor oleh lawan, peringkat resmi, tim lengkap, pembayaran, pemesanan lapangan, peta langsung, atau notifikasi push. Mengisi konfigurasi Supabase menyiapkan Auth; itu belum menghubungkan data kegiatan ke database.
+Belum tersedia sinkronisasi antarpengguna, pengiriman permintaan teman sungguhan, konfirmasi skor oleh lawan, peringkat resmi, tim lengkap, pembayaran, pemesanan lapangan, peta langsung, atau notifikasi push. Mengisi konfigurasi PostgreSQL menyiapkan Auth; itu belum menghubungkan data kegiatan ke database.
 
 ## B. File utama
 
@@ -17,7 +17,7 @@ Belum tersedia sinkronisasi antarpengguna, pengiriman permintaan teman sungguhan
 | `lib/core/theme/` | Tema terang, gelap dan mengikuti perangkat. |
 | `lib/data/models/` | Model kegiatan dan validasi format data lokal. |
 | `lib/data/repositories/` | Penyimpanan lokal dan antrean penulisan. |
-| `lib/data/providers/` | Keadaan aplikasi dengan Riverpod, client Supabase opsional. |
+| `lib/data/providers/` | Keadaan aplikasi dengan Riverpod, client PostgreSQL opsional. |
 | `lib/features/` | Halaman serta aturan fitur. |
 | `lib/shared/` | Kartu, tombol, ikon dan navigasi bersama. |
 | `assets/figma/` | Aset asli Figma dan manifest asal aset. |
@@ -28,7 +28,7 @@ Belum tersedia sinkronisasi antarpengguna, pengiriman permintaan teman sungguhan
 
 ## C. Struktur dan bahasa
 
-Bahasa aplikasi: **Dart**, framework **Flutter**. Riverpod mengatur keadaan, go_router mengatur navigasi, shared_preferences menyimpan data lokal, flutter_svg menampilkan ikon, dan supabase_flutter menyiapkan layanan akun opsional. Komponen Material memakai paket material_ui pada Flutter 3.50. Font Inter disertakan lokal beserta lisensinya.
+Bahasa aplikasi: **Dart**, framework **Flutter**. Riverpod mengatur keadaan, go_router mengatur navigasi, shared_preferences menyimpan data lokal, flutter_svg menampilkan ikon, dan postgres menyiapkan koneksi database opsional. Komponen Material memakai paket material_ui pada Flutter 3.50. Font Inter disertakan lokal beserta lisensinya.
 
 Kode fitur berada di `lib/features/{home,social,events,tanding,profile,auth,venues,leaderboard}`. Widget menyesuaikan tinggi isi dan memakai area aman perangkat. Aplikasi Flutter ini menggambar antarmuka langsung.
 
@@ -44,7 +44,7 @@ Data uji coba disimpan melalui **SharedPreferences** pada penyimpanan aplikasi d
 
 Perubahan ditulis secara berurutan. Tampilan baru diperbarui setelah penyimpanan berhasil; kegagalan tidak ditampilkan sebagai sukses. Rekaman yang tidak dapat dibaca dipertahankan dan menampilkan pesan gagal, bukan dihapus diam-diam. Kata sandi tidak disimpan dalam rekaman data lokal ini.
 
-Proyek Supabase pengguna belum tersedia. Belum ada database, migrasi, RLS atau bucket yang diterapkan. Untuk tahap akun berikutnya, salin `config.example.json` menjadi `config.local.json`, isi URL dan publishable/anon key, lalu gunakan profil **KLIK · Supabase**. File lokal itu diabaikan Git. Jangan memasukkan secret key atau service_role. SDK mengelola sesi Auth terpisah; alur lengkap pemulihan kata sandi/deep link mobile masih perlu diselesaikan dan diuji.
+Koneksi PostgreSQL belum tersedia. Belum ada database, migrasi, atau tabel yang diterapkan. Untuk tahap akun berikutnya, salin `config.example.json` menjadi `config.local.json`, isi DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, dan DB_PASSWORD, lalu gunakan profil **KLIK · PostgreSQL**. File lokal itu diabaikan Git. Jangan memasukkan kredensial produksi.
 
 ## F. Menjalankan dan membuat APK
 
@@ -97,7 +97,7 @@ Setelah build tersedia, periksa seluruh tab, pencarian, buat/gabung/keluar ruang
 | Android SDK memiliki spasi | Gunakan lokasi SDK tanpa spasi dan perbarui konfigurasi Flutter/Android Studio. |
 | HP tidak terdeteksi | Periksa USB debugging, persetujuan HP, kabel dan driver. |
 | Windows memblokir alat resmi | Minta pengelola perangkat memeriksa izin, atau gunakan build GitHub yang disetujui. Jangan menonaktifkan perlindungan perangkat. |
-| Login belum aktif | Proyek Supabase dan konfigurasi publik belum tersedia; gunakan Coba tanpa akun. |
+| Login belum aktif | Database PostgreSQL dan konfigurasi belum tersedia; gunakan Coba tanpa akun. |
 | Data tidak muncul di HP lain | Penyimpanan saat ini lokal, belum tersinkron ke server. |
 | Paket APK belum terlihat | Periksa hasil build; sumber ZIP bukan APK yang dapat dipasang. |
 

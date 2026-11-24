@@ -199,12 +199,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Tooltip(
-                      message: 'Notifikasi',
-                      child: InkResponse(
-                        onTap: () => context.push('/notifications'),
-                        child: const FigmaIcon('notification'),
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final notifs = (data['notifications'] as List? ?? []);
+                        final incoming = (data['incomingRequests'] as List? ?? []);
+                        final hasUnread = notifs.any((n) => n is Map && n['isRead'] != true) || incoming.isNotEmpty;
+                        return Tooltip(
+                          message: 'Notifikasi',
+                          child: InkResponse(
+                            onTap: () => context.push('/notifications'),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                const FigmaIcon('notification'),
+                                if (hasUnread)
+                                  Positioned(
+                                    right: 2,
+                                    top: 2,
+                                    child: Container(
+                                      width: 9,
+                                      height: 9,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.error,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Theme.of(context).colorScheme.surface,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

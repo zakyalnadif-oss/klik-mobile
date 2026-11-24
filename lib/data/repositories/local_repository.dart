@@ -60,6 +60,8 @@ class LocalRepository {
       'joined': <String>[],
       'friends': <String>[],
       'requested': <String>[],
+      'incomingRequests': <String>[],
+      'notifications': <dynamic>[],
       'communities': <String>[],
       'results': <String, dynamic>{},
       'readNotifications': false,
@@ -73,6 +75,14 @@ class LocalRepository {
     if (data['playerId'] == null) {
       data['playerId'] =
           'local-${DateTime.now().microsecondsSinceEpoch}-${Random.secure().nextInt(0x100000000).toRadixString(16)}';
+      changed = true;
+    }
+    if (data['incomingRequests'] == null) {
+      data['incomingRequests'] = <String>[];
+      changed = true;
+    }
+    if (data['notifications'] == null) {
+      data['notifications'] = <dynamic>[];
       changed = true;
     }
     final matches = data['rankedMatches'] as Map? ?? <String, dynamic>{};

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../data/providers/local_state.dart';
 import '../../../shared/widgets/klik_ui.dart';
 
+import '../logic/session_provider.dart';
+
 class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
   @override
@@ -39,7 +41,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Versi ini menyediakan mode uji coba lokal. Data contoh dan perubahan hanya ada di perangkat, belum tersinkron antar pengguna.',
+              'Terhubung langsung ke server database KLIK. Masuk atau daftar untuk berteman dan bermain dengan pemain lain secara real-time.',
             ),
           ],
         ),
@@ -50,6 +52,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         onPressed: () async {
           setState(() => busy = true);
           try {
+            final api = ref.read(authApiClientProvider);
+            final syncData = await api.fetchSync();
+            if (syncData != null) {
+              await ref.read(localStateProvider.notifier).syncWithServer(syncData);
+            }
             await ref.read(localStateProvider.notifier).start();
             if (context.mounted) context.go('/');
           } catch (_) {
