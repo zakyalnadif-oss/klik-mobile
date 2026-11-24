@@ -3,7 +3,7 @@
   "DB_PORT": 5432,
   "DB_NAME": "klik_db",
   "DB_USERNAME": "postgres",
-  "DB_PASSWORD": "j0403251042",
-  "JWT_SECRET": "klik-dev-secret-change-me",
+  "DB_PASSWORD": "",
+  "JWT_SECRET": "",
   "PORT": 8080
 }

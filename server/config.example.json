@@ -1,0 +1,9 @@
+{
+  "DB_HOST": "localhost",
+  "DB_PORT": 5432,
+  "DB_NAME": "klik_db",
+  "DB_USERNAME": "postgres",
+  "DB_PASSWORD": "",
+  "JWT_SECRET": "replace-with-a-random-secret",
+  "PORT": 8080
+}

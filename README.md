@@ -44,7 +44,7 @@ Data uji coba disimpan melalui **SharedPreferences** pada penyimpanan aplikasi d
 
 Perubahan ditulis secara berurutan. Tampilan baru diperbarui setelah penyimpanan berhasil; kegagalan tidak ditampilkan sebagai sukses. Rekaman yang tidak dapat dibaca dipertahankan dan menampilkan pesan gagal, bukan dihapus diam-diam. Kata sandi tidak disimpan dalam rekaman data lokal ini.
 
-Koneksi PostgreSQL belum tersedia. Belum ada database, migrasi, atau tabel yang diterapkan. Untuk tahap akun berikutnya, salin `config.example.json` menjadi `config.local.json`, isi DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, dan DB_PASSWORD, lalu gunakan profil **KLIK · PostgreSQL**. File lokal itu diabaikan Git. Jangan memasukkan kredensial produksi.
+Repo sudah menyertakan API Dart, driver PostgreSQL, dan skema tabel di `server/sql/init.sql`. Database harus dibuat dan skema SQL dijalankan secara manual sebelum akun online bisa dipakai. Backend membaca `server/config.local.json`; aplikasi Flutter membaca `config.local.json` di folder utama untuk alamat API. Kedua file lokal diabaikan Git.
 
 ## F. Menjalankan dan membuat APK
 
@@ -100,6 +100,43 @@ Setelah build tersedia, periksa seluruh tab, pencarian, buat/gabung/keluar ruang
 | Login belum aktif | Database PostgreSQL dan konfigurasi belum tersedia; gunakan Coba tanpa akun. |
 | Data tidak muncul di HP lain | Penyimpanan saat ini lokal, belum tersinkron ke server. |
 | Paket APK belum terlihat | Periksa hasil build; sumber ZIP bukan APK yang dapat dipasang. |
+
+## J. Menjalankan PostgreSQL dan API lokal
+
+Di Windows, pastikan layanan PostgreSQL hidup dan port 5432 menerima koneksi (`pg_isready`). Buat database bernama `klik_db` jika belum ada:
+
+```powershell
+psql -U postgres -d postgres -c "CREATE DATABASE klik_db;"
+```
+
+Jika database sudah ada, lanjut ke langkah berikutnya. Dari folder utama proyek jalankan:
+
+```powershell
+psql -U postgres -d klik_db -f server/sql/init.sql
+psql -U postgres -d klik_db -f server/sql/seed.sql
+psql -U postgres -d klik_db -f server/sql/seed_all_sports.sql
+```
+
+`seed.sql` berisi contoh kegiatan dan pemain. `seed_all_sports.sql` menambahkan contoh cabor lain; keduanya aman dijalankan ulang.
+
+Salin `server/config.example.json` menjadi `server/config.local.json`, lalu isi kata sandi PostgreSQL dan rahasia JWT acak. Dari folder `server`, jalankan:
+
+```powershell
+Copy-Item config.example.json config.local.json
+dart pub get
+dart run bin/server.dart
+```
+
+Di terminal kedua, salin `config.example.json` di folder utama menjadi `config.local.json` (file ini hanya mengatur alamat API), lalu isi `API_BASE_URL` dengan `http://localhost:8080`. Dengan Flutter minimal 3.47, jalankan:
+
+```powershell
+flutter pub get
+flutter run -d chrome --dart-define-from-file=config.local.json
+```
+
+Tanpa konfigurasi PostgreSQL/API, aplikasi tetap bisa dibuka dengan `flutter run -d chrome` dan **Coba tanpa akun**; data itu hanya tersimpan lokal. API online di HP perlu URL server yang bisa dijangkau HP, bukan `localhost` HP.
+
+Jangan gunakan backend ini untuk produksi: password akun saat ini disimpan sebagai teks biasa, beberapa operasi belum tersambung ke aplikasi, dan rahasia yang pernah masuk ke riwayat Git perlu dirotasi.
 
 
 

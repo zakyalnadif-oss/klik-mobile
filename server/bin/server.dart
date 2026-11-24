@@ -11,9 +11,10 @@ late final Map<String, dynamic> _config;
 late Connection _db;
 
 Future<void> main() async {
-  final configFile = File('config.json');
+  final localConfig = File('config.local.json');
+  final configFile = localConfig.existsSync() ? localConfig : File('config.json');
   if (!configFile.existsSync()) {
-    print('❌ config.json tidak ditemukan.');
+    print('❌ config.local.json tidak ditemukan. Salin config.example.json lalu isi kredensial PostgreSQL.');
     exit(1);
   }
   _config = jsonDecode(configFile.readAsStringSync()) as Map<String, dynamic>;
