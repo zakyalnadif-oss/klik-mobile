@@ -1,20 +1,11 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../data/providers/local_state.dart';
 import '../../../shared/widgets/klik_ui.dart';
 
-import '../logic/session_provider.dart';
-
-class WelcomeScreen extends ConsumerStatefulWidget {
+class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
-  @override
-  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
-}
 
-class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
-  bool busy = false;
   @override
   Widget build(BuildContext context) => KPage(
     title: 'klik',
@@ -41,46 +32,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Terhubung langsung ke server database KLIK. Masuk atau daftar untuk berteman dan bermain dengan pemain lain secara real-time.',
+              'Terhubung langsung ke server database KLIK. Masuk atau daftar akun untuk mulai mencari rekan dan berteman.',
             ),
           ],
         ),
       ),
       KButton(
-        'Coba tanpa akun',
-        busy: busy,
-        onPressed: () async {
-          setState(() => busy = true);
-          try {
-            final api = ref.read(authApiClientProvider);
-            final syncData = await api.fetchSync();
-            if (syncData != null) {
-              await ref.read(localStateProvider.notifier).syncWithServer(syncData);
-            }
-            await ref.read(localStateProvider.notifier).start();
-            if (context.mounted) context.go('/');
-          } catch (_) {
-            if (context.mounted) {
-              setState(() => busy = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Mode uji coba belum dapat dimulai. Periksa penyimpanan perangkat.',
-                  ),
-                ),
-              );
-            }
-          }
-        },
-      ),
-      KButton(
         'Masuk',
-        secondary: true,
         onPressed: () => context.push('/login'),
       ),
-      TextButton(
+      KButton(
+        'Daftar Akun Baru',
+        secondary: true,
         onPressed: () => context.push('/register'),
-        child: const Text('Belum punya akun? Daftar'),
       ),
       const LocalNotice(),
     ],

@@ -142,13 +142,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Row(
                   children: [
-                    ClipOval(
-                      child: Image.asset(
-                        'assets/figma/avatar.png',
-                        width: 44,
-                        height: 44,
-                        fit: BoxFit.cover,
-                      ),
+                    UserAvatar(
+                      name: data['name'] as String? ?? 'KLIK User',
+                      avatarUrl: data['avatarUrl'] as String?,
+                      size: 44,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -156,11 +153,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'klik',
+                            data['name'] as String? ?? 'klik',
                             style: textStyle(
-                              20,
+                              18,
                               weight: FontWeight.w800,
                             ).copyWith(height: 1.2),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           if (!expandedHeader) ...[
                             const SizedBox(height: 5),
@@ -214,13 +213,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 const FigmaIcon('notification'),
                                 if (hasUnread)
                                   Positioned(
-                                    right: 2,
-                                    top: 2,
+                                    right: 11,
+                                    top: 10,
                                     child: Container(
-                                      width: 9,
-                                      height: 9,
+                                      width: 8,
+                                      height: 8,
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.error,
+                                        color: const Color(0xFFFF8D28),
                                         shape: BoxShape.circle,
                                         border: Border.all(
                                           color: Theme.of(context).colorScheme.surface,
@@ -283,7 +282,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             if (events.isEmpty)
               EmptyState(
                 'Belum ada event $sport',
-                'Buat event uji coba pertamamu.',
+                'Buat event pertamamu.',
                 action: 'Buat Event',
                 onAction: () => context.push('/new/event'),
               )

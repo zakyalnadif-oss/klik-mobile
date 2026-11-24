@@ -89,6 +89,9 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
       if (user['playerId'] != null && (user['playerId'] as String).isNotEmpty) {
         j['playerId'] = user['playerId'];
       }
+      if (user['avatar_url'] != null) {
+        j['avatarUrl'] = user['avatar_url'];
+      }
     }
   });
 
@@ -115,21 +118,49 @@ class LocalState extends AsyncNotifier<Map<String, dynamic>> {
   Future<void> cancelCheckout(String id) =>
       change((j) => CheckoutRules.cancel(j, id));
   Future<void> leave(String id) => change((j) => ActivityRules.leave(j, id));
-  Future<void> create(Activity activity, {String? teamName}) => change((j) {
+  Future<String> create(Activity activity, {String? teamName}) async {
     ActivityRules.validateNew(activity, DateTime.now());
-    if ((j['activities'] as List).any((a) => a['id'] == activity.id)) {
-      throw StateError('Kegiatan sudah dibuat.');
-    }
-    (j['activities'] as List).insert(0, {
-      ...activity.toJson(),
-      'owned': true,
-      'owner': j['name'],
+    final api = ref.read(authApiClientProvider);
+    
+    // Save to PostgreSQL via REST API
+    final serverId = await api.createActivity({
+      'kind': activity.kind,
+      'title': activity.title,
+      'sport': activity.sport,
+      'venue': activity.venue,
+      'city': activity.city,
+      'mode': activity.mode,
+      'startsAt': activity.startsAt.toUtc().toIso8601String(),
+      'durationMinutes': activity.durationMinutes,
+      'capacity': activity.capacity,
+      'price': activity.price,
+      'owner': activity.owner,
+      'description': activity.description,
+      'teamName': teamName,
     });
-    (j['joined'] as List).add(activity.id);
-    if (MatchRules.rankedRoom(activity) && teamName != null) {
-      MatchRules.registerTeam(j, activity.id, teamName, DateTime.now());
-    }
-  });
+
+    final actualId = serverId ?? activity.id;
+    final savedActivity = activity.copyWith(id: actualId);
+
+    await change((j) {
+      if ((j['activities'] as List).any((a) => a['id'] == actualId)) {
+        throw StateError('Kegiatan sudah dibuat.');
+      }
+      (j['activities'] as List).insert(0, {
+        ...savedActivity.toJson(),
+        'owned': true,
+        'owner': j['name'],
+      });
+      if (!(j['joined'] as List).contains(actualId)) {
+        (j['joined'] as List).add(actualId);
+      }
+      if (MatchRules.rankedRoom(savedActivity) && teamName != null) {
+        MatchRules.registerTeam(j, actualId, teamName, DateTime.now());
+      }
+    });
+
+    return actualId;
+  }
   Future<void> registerMatchTeam(String id, String name) =>
       change((j) => MatchRules.registerTeam(j, id, name, DateTime.now()));
   Future<void> requestFriend(String id) async {

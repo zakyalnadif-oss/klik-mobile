@@ -183,7 +183,7 @@ class ActivityCard extends StatelessWidget {
               child: Text(
                 a.isEvent
                     ? (joined ? 'Lihat Detail' : 'Lihat Acara')
-                    : 'Gabung',
+                    : (joined ? 'Lihat' : 'Gabung'),
                 style: textStyle(11, weight: FontWeight.w600),
               ),
             ),

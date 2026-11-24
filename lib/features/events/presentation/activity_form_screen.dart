@@ -127,7 +127,7 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
                 const SizedBox(height: 12),
               ],
               Text(
-                'Berperingkat memerlukan hasil yang dikonfirmasi kedua pihak. Mode uji coba tidak mengubah poin resmi.',
+                'Berperingkat memerlukan hasil yang dikonfirmasi oleh ketua kedua tim.',
                 style: textStyle(12, color: secondary(context)),
               ),
             ],
@@ -253,7 +253,7 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
                 value: agree,
                 onChanged: (v) => setState(() => agree = v ?? false),
                 title: const Text(
-                  'Saya memahami kegiatan ini tersimpan lokal dan belum dipublikasikan ke pengguna lain.',
+                  'Saya menyetujui ketentuan dan peraturan kegiatan ini.',
                 ),
               ),
             ],
@@ -269,7 +269,7 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
       KButton(
         step < 2
             ? 'Lanjutkan'
-            : 'Terbitkan ${widget.kind == 'event' ? 'Event' : 'Room'} uji coba',
+            : 'Terbitkan ${widget.kind == 'event' ? 'Event' : 'Room'}',
         busy: busy,
         onPressed: step == 2 && !agree
             ? null
@@ -307,7 +307,7 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
                   owned: true,
                 );
                 try {
-                  await ref
+                  final createdId = await ref
                       .read(localStateProvider.notifier)
                       .create(
                         a,
@@ -316,7 +316,7 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
                             ? teamName.text
                             : null,
                       );
-                  if (context.mounted) context.replace('/activity/${a.id}');
+                  if (context.mounted) context.replace('/activity/$createdId');
                 } catch (_) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(

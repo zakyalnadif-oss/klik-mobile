@@ -46,46 +46,39 @@ class RankingPreview extends ConsumerWidget {
           ),
           for (final r in rows)
             Container(
+              margin: const EdgeInsets.only(bottom: 4),
               padding: EdgeInsets.symmetric(
-                horizontal: r['highlight'] == true ? 12 : 0,
-                vertical: r['highlight'] == true ? 12 : 7,
+                horizontal: r['highlight'] == true ? 10 : 4,
+                vertical: r['highlight'] == true ? 10 : 6,
               ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
+                color: r['highlight'] == true
+                    ? accent.withValues(alpha: 0.08)
+                    : null,
                 border: r['highlight'] == true
-                    ? Border.all(color: accent)
+                    ? Border.all(color: accent, width: 1.5)
                     : null,
               ),
               child: Row(
                 children: [
                   SizedBox(
-                    width: 18,
+                    width: 20,
                     child: Text(
                       '${r['rank']}',
                       textAlign: TextAlign.center,
                       style: textStyle(
-                        16,
-                        weight: FontWeight.w700,
+                        15,
+                        weight: FontWeight.w800,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 34,
-                    height: 34,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF26262A)
-                          : const Color(0xFFECE7DF),
-                    ),
-                    child: Text(
-                      r['initials'] as String,
-                      textScaler: TextScaler.noScaling,
-                      style: textStyle(12, weight: FontWeight.w700),
-                    ),
+                  const SizedBox(width: 8),
+                  UserAvatar(
+                    name: r['name'] as String? ?? '',
+                    initials: r['initials'] as String?,
+                    size: 32,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -94,29 +87,28 @@ class RankingPreview extends ConsumerWidget {
                       children: [
                         Text(
                           r['name'] as String,
-                          style: textStyle(13, weight: FontWeight.w600),
+                          style: textStyle(13, weight: FontWeight.w700),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           r['detail'] as String,
-                          style: textStyle(10, color: secondary(context)),
+                          style: textStyle(11, color: secondary(context)),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        r['points'] as String,
-                        softWrap: false,
-                        textAlign: TextAlign.right,
-                        style: textStyle(
-                          17,
-                          weight: FontWeight.w700,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
+                  Text(
+                    r['points'] as String,
+                    textAlign: TextAlign.right,
+                    style: textStyle(
+                      16,
+                      weight: FontWeight.w800,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],
@@ -125,13 +117,8 @@ class RankingPreview extends ConsumerWidget {
           if (rows.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
-              child: Text('Belum ada contoh peringkat untuk pilihan ini.'),
+              child: Text('Belum ada peringkat untuk pilihan ini.'),
             ),
-          const SizedBox(height: 8),
-          Text(
-            'Contoh dari prototipe Figma • bukan poin atau peringkat resmi.',
-            style: textStyle(10, color: secondary(context)),
-          ),
         ],
       ),
     );

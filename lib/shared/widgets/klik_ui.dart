@@ -250,13 +250,98 @@ class EmptyState extends StatelessWidget {
   );
 }
 
+Color playerAvatarColor(String name) {
+  final palette = [
+    const Color(0xFFE2F163), // brand accent
+    const Color(0xFF64B5F6), // light blue
+    const Color(0xFFFFB74D), // orange
+    const Color(0xFF81C784), // green
+    const Color(0xFFBA68C8), // purple
+    const Color(0xFFFF8A65), // deep orange
+    const Color(0xFF4DB6AC), // teal
+    const Color(0xFFFFD54F), // amber
+  ];
+  if (name.isEmpty) return palette.first;
+  final code = name.codeUnits.fold<int>(0, (prev, elem) => prev + elem);
+  return palette[code % palette.length];
+}
+
+class UserAvatar extends StatelessWidget {
+  const UserAvatar({
+    super.key,
+    required this.name,
+    this.avatarUrl,
+    this.initials,
+    this.size = 44,
+  });
+
+  final String name;
+  final String? avatarUrl;
+  final String? initials;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveInitials = (initials != null && initials!.isNotEmpty)
+        ? initials!
+        : name.split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase();
+
+    final bg = playerAvatarColor(name);
+
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) {
+      if (avatarUrl!.startsWith('assets/')) {
+        return ClipOval(
+          child: Image.asset(
+            avatarUrl!,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                _fallback(bg, effectiveInitials),
+          ),
+        );
+      } else if (avatarUrl!.startsWith('http')) {
+        return ClipOval(
+          child: Image.network(
+            avatarUrl!,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                _fallback(bg, effectiveInitials),
+          ),
+        );
+      }
+    }
+
+    return _fallback(bg, effectiveInitials);
+  }
+
+  Widget _fallback(Color bg, String text) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: bg,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text.isEmpty ? 'P' : text,
+        style: textStyle(
+          size * 0.38,
+          weight: FontWeight.w800,
+          color: const Color(0xFF171B12),
+        ),
+      ),
+    );
+  }
+}
+
 class LocalNotice extends StatelessWidget {
   const LocalNotice({super.key});
   @override
-  Widget build(BuildContext context) => Text(
-    'Mode uji coba • Data contoh dan perubahan tersimpan di perangkat ini.',
-    style: textStyle(10, color: secondary(context)),
-  );
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
 Future<bool> confirmAction(

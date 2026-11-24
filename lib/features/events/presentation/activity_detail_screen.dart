@@ -183,7 +183,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                     await perform(
                       context,
                       () => ref.read(localStateProvider.notifier).join(a.id),
-                      success: 'Berhasil bergabung dalam uji coba lokal.',
+                      success: 'Berhasil bergabung dengan kegiatan.',
                     );
                     if (context.mounted) setState(() => busy = false);
                   },

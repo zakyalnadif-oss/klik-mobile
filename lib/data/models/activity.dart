@@ -63,4 +63,41 @@ class Activity {
     'owned': owned,
     'durationMinutes': durationMinutes,
   };
+
+  Activity copyWith({
+    String? id,
+    String? kind,
+    String? title,
+    String? sport,
+    String? venue,
+    String? city,
+    String? mode,
+    DateTime? startsAt,
+    int? capacity,
+    int? occupied,
+    int? price,
+    String? owner,
+    String? description,
+    bool? demo,
+    bool? owned,
+    int? durationMinutes,
+  }) =>
+      Activity(
+        id: id ?? this.id,
+        kind: kind ?? this.kind,
+        title: title ?? this.title,
+        sport: sport ?? this.sport,
+        venue: venue ?? this.venue,
+        city: city ?? this.city,
+        mode: mode ?? this.mode,
+        startsAt: startsAt ?? this.startsAt,
+        capacity: capacity ?? this.capacity,
+        occupied: occupied ?? this.occupied,
+        price: price ?? this.price,
+        owner: owner ?? this.owner,
+        description: description ?? this.description,
+        demo: demo ?? this.demo,
+        owned: owned ?? this.owned,
+        durationMinutes: durationMinutes ?? this.durationMinutes,
+      );
 }

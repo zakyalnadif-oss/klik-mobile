@@ -19,6 +19,7 @@ class AuthApiClient {
     required String email,
     required String password,
     String? displayName,
+    String? city,
   }) async {
     final response = await http.post(
       Uri.parse('$_baseUrl/api/auth/register'),
@@ -27,6 +28,7 @@ class AuthApiClient {
         'email': email,
         'password': password,
         'display_name': displayName ?? '',
+        if (city != null && city.isNotEmpty) 'city': city,
       }),
     );
 
@@ -88,6 +90,22 @@ class AuthApiClient {
     } catch (_) {
       // Backend unavailable; fallback to offline cache/catalog
     }
+    return null;
+  }
+
+  /// Create a new activity (Room or Event) in PostgreSQL database.
+  Future<String?> createActivity(Map<String, dynamic> activityData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/api/activities'),
+        headers: _headers,
+        body: jsonEncode(activityData),
+      );
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return data['id'] as String?;
+      }
+    } catch (_) {}
     return null;
   }
 

@@ -7,10 +7,10 @@
     {"id":"room-biliar","kind":"room","title":"Biliar akhir pekan","sport":"Biliar","venue":"Biliar Fatmawati","city":"Jakarta Selatan","mode":"Kasual","dayOffset":4,"hour":19,"capacity":4,"occupied":2,"price":50000,"owner":"Bayu","description":"Latihan biliar santai, bergantian bermain dan saling belajar."}
   ],
   "rankings": [
-    {"sport":"Futsal","type":"Tim","rank":1,"initials":"RP","name":"Tim gacor","detail":"28/35 menang • 80%","points":"1.680","highlight":false},
-    {"sport":"Futsal","type":"Tim","rank":2,"initials":"NS","name":"bobor squat","detail":"24/32 menang • 75%","points":"1.520","highlight":false},
-    {"sport":"Futsal","type":"Tim","rank":3,"initials":"WL","name":"we are the campion","detail":"21/30 menang • 70%","points":"1.360","highlight":false},
-    {"sport":"Futsal","type":"Tim","rank":4,"initials":"AP","name":"Kamu · Vokasi bogor","detail":"Posisi kamu · Futsal","points":"1.240","highlight":true}
+    {"sport":"Futsal","type":"Tim","rank":1,"initials":"TG","name":"Tim Gacor FC","detail":"28/35 menang • 80%","points":"1.680","highlight":false},
+    {"sport":"Futsal","type":"Tim","rank":2,"initials":"BS","name":"Bogor Squad","detail":"24/32 menang • 75%","points":"1.520","highlight":false},
+    {"sport":"Futsal","type":"Tim","rank":3,"initials":"WC","name":"Champions FC","detail":"21/30 menang • 70%","points":"1.360","highlight":false},
+    {"sport":"Futsal","type":"Tim","rank":4,"initials":"VB","name":"Vokasi Bogor (Kamu)","detail":"Posisi kamu • Futsal","points":"1.240","highlight":true}
   ],
   "players": [
     {"id":"adi","name":"Adi Pratama","handle":"@adi.pratama","sport":"Futsal","city":"Jakarta Selatan","level":"Menengah","initials":"AP"},

@@ -15,6 +15,8 @@ dependencies:
   shared_preferences: ^2.5.6
   flutter_svg: ^2.4.0
   qr_flutter: ^4.1.0
+  geolocator: ^14.1.2
+  geocoding: ^5.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

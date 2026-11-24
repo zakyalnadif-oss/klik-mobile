@@ -148,17 +148,11 @@ class _IncomingRequestCardState extends ConsumerState<IncomingRequestCard> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                backgroundColor: accent,
-                child: Text(
-                  p['initials'] as String? ?? 'P',
-                  textScaler: TextScaler.noScaling,
-                  style: textStyle(
-                    15,
-                    weight: FontWeight.w800,
-                    color: const Color(0xFF171B12),
-                  ),
-                ),
+              UserAvatar(
+                name: p['name'] as String? ?? 'Pemain',
+                avatarUrl: p['avatar_url'] as String?,
+                initials: p['initials'] as String?,
+                size: 40,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -253,17 +247,11 @@ class _PlayerTileState extends ConsumerState<PlayerTile> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                backgroundColor: accent,
-                child: Text(
-                  p['initials'] as String? ?? 'P',
-                  textScaler: TextScaler.noScaling,
-                  style: textStyle(
-                    15,
-                    weight: FontWeight.w800,
-                    color: const Color(0xFF171B12),
-                  ),
-                ),
+              UserAvatar(
+                name: p['name'] as String? ?? 'Pemain',
+                avatarUrl: p['avatar_url'] as String?,
+                initials: p['initials'] as String?,
+                size: 40,
               ),
               const SizedBox(width: 12),
               Expanded(

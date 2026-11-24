@@ -46,26 +46,15 @@ class SettingsScreen extends ConsumerWidget {
             'Data uji coba disimpan melalui SharedPreferences di perangkat ini, bukan server. Menghapus data aplikasi atau uninstall dapat menghilangkannya. Belum ada sinkronisasi atau pencadangan cloud. Jangan gunakan data sensitif untuk pengujian.',
           ),
         ),
-        const SectionTitle('Versi aplikasi'),
-        const Text('KLIK 0.4.3 • Uji coba lokal'),
+        const SizedBox(height: 12),
         KButton(
-          'Coba input dua ketua',
-          secondary: true,
-          onPressed: () => context.push('/score-example'),
-        ),
-        KButton(
-          'Akun dan login',
-          secondary: true,
-          onPressed: () => context.push('/login'),
-        ),
-        KButton(
-          'Keluar dari sesi',
+          'Log Out',
           secondary: true,
           onPressed: () async {
             if (!await confirmAction(
               context,
-              'Keluar dari sesi?',
-              'Data uji coba akan tetap tersimpan di perangkat.',
+              'Log Out?',
+              'Apakah kamu yakin ingin keluar dari akun ini?',
             )) {
               return;
             }
@@ -81,7 +70,7 @@ class SettingsScreen extends ConsumerWidget {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Sesi belum berhasil diakhiri. Coba lagi.'),
+                    content: Text('Gagal log out. Coba lagi.'),
                   ),
                 );
               }

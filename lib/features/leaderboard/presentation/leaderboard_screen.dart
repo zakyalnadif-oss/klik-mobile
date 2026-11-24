@@ -35,10 +35,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         onChanged: (v) => setState(() => sport = v!),
       ),
       RankingPreview(sport: sport, type: type, link: false),
-      const Text(
-        'Hasil uji coba tidak mengubah contoh peringkat ini. Peringkat resmi memerlukan backend dan hasil yang dikonfirmasi lawan.',
-      ),
-      const LocalNotice(),
     ],
   );
 }

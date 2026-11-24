@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/services/location_helper.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/providers/backend_provider.dart';
 import '../../../data/providers/local_state.dart';
@@ -19,14 +20,49 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final form = GlobalKey<FormState>();
   final email = TextEditingController(),
       password = TextEditingController(),
-      name = TextEditingController();
-  bool busy = false, hide = true;
+      name = TextEditingController(),
+      city = TextEditingController();
+  bool busy = false, hide = true, detectingLocation = false;
   String? error, notice;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.mode == 'register') {
+      _detectLocation();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AuthScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.mode == 'register' && (oldWidget.mode != 'register' || city.text.isEmpty)) {
+      _detectLocation();
+    }
+  }
+
+  Future<void> _detectLocation() async {
+    if (detectingLocation) return;
+    setState(() => detectingLocation = true);
+    try {
+      final detected = await LocationHelper.detectCurrentCity();
+      if (detected != null && detected.isNotEmpty && mounted) {
+        setState(() {
+          city.text = detected;
+        });
+      }
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => detectingLocation = false);
+    }
+  }
+
   @override
   void dispose() {
     email.dispose();
     password.dispose();
     name.dispose();
+    city.dispose();
     super.dispose();
   }
 
@@ -79,7 +115,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         if (!configured)
           const KCard(
             child: Text(
-              'Akun online belum tersedia karena server API belum dihubungkan. Kamu tetap bisa mencoba kegiatan melalui "Coba tanpa akun".',
+              'Server API belum dapat dihubungi. Pastikan server backend KLIK telah berjalan.',
             ),
           ),
         Form(
@@ -95,6 +131,45 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     autofillHints: const [AutofillHints.name],
                     decoration: const InputDecoration(
                       labelText: 'Nama lengkap',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: city,
+                    maxLength: 60,
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? 'Lokasi/domisili wajib diisi'
+                        : null,
+                    decoration: InputDecoration(
+                      labelText: 'Kota / Domisili',
+                      hintText: detectingLocation
+                          ? 'Mendeteksi lokasi saat ini...'
+                          : 'Contoh: Bogor',
+                      helperText: detectingLocation
+                          ? 'Sedang mencari posisi GPS...'
+                          : (city.text.isNotEmpty
+                              ? 'Lokasi otomatis terdeteksi saat mendaftar'
+                              : 'Otomatis diisi posisi GPS Anda'),
+                      prefixIcon: const Icon(Icons.location_on_outlined),
+                      suffixIcon: detectingLocation
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              tooltip: 'Deteksi ulang posisi',
+                              icon: const Icon(Icons.my_location),
+                              onPressed: _detectLocation,
+                            ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -175,10 +250,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         );
                       }
                     } else if (register) {
+                      var effectiveCity = city.text.trim();
+                      if (effectiveCity.isEmpty) {
+                        final detected =
+                            await LocationHelper.detectCurrentCity();
+                        effectiveCity = (detected != null && detected.isNotEmpty)
+                            ? detected
+                            : 'Bogor';
+                        city.text = effectiveCity;
+                      }
                       final userData = await api.register(
                         email: email.text.trim(),
                         password: password.text,
                         displayName: name.text.trim(),
+                        city: effectiveCity,
                       );
                       ref.read(sessionProvider.notifier).state = userData;
                       final syncData = await api.fetchSync();
@@ -220,29 +305,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             onPressed: () => context.push('/reset-password'),
             child: const Text('Lupa kata sandi?'),
           ),
-        KButton(
-          'Coba tanpa akun',
-          secondary: true,
-          onPressed: busy
-              ? null
-              : () async {
-                  final api = ref.read(authApiClientProvider);
-                  final syncData = await api.fetchSync();
-                  if (syncData != null) {
-                    await ref.read(localStateProvider.notifier).syncWithServer(syncData);
-                  }
-                  if (!context.mounted) return;
-                  await perform(
-                    context,
-                    () => ref.read(localStateProvider.notifier).start(),
-                  );
-                  if (context.mounted &&
-                      ref.read(localStateProvider).requireValue['onboarded'] ==
-                          true) {
-                    context.go('/');
-                  }
-                },
-        ),
         if (!reset)
           TextButton(
             onPressed: () => context.push(register ? '/login' : '/register'),

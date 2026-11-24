@@ -66,6 +66,8 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>KLIK membutuhkan izin lokasi untuk menentukan kota domisili Anda secara otomatis saat mendaftar.</string>
 </dict>
 </plist>
 

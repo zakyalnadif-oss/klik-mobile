@@ -226,12 +226,11 @@ class _NotificationCardState extends ConsumerState<_NotificationCard> {
                         ),
                         child: Row(
                           children: [
-                            CircleAvatar(
-                              backgroundColor: accent,
-                              child: Text(
-                                player['initials'] as String? ?? 'P',
-                                style: textStyle(14, weight: FontWeight.w800, color: const Color(0xFF171B12)),
-                              ),
+                            UserAvatar(
+                              name: player['name'] as String? ?? 'Pemain',
+                              avatarUrl: player['avatar_url'] as String?,
+                              initials: player['initials'] as String?,
+                              size: 40,
                             ),
                             const SizedBox(width: 12),
                             Expanded(

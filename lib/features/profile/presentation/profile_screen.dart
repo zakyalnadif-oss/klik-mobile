@@ -25,13 +25,10 @@ class ProfileScreen extends ConsumerWidget {
         KCard(
           child: Column(
             children: [
-              ClipOval(
-                child: Image.asset(
-                  'assets/figma/avatar.png',
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
+              UserAvatar(
+                name: data['name'] as String? ?? 'Pemain',
+                avatarUrl: data['avatarUrl'] as String?,
+                size: 80,
               ),
               const SizedBox(height: 14),
               Text(
@@ -93,17 +90,6 @@ class ProfileScreen extends ConsumerWidget {
           secondary: true,
           onPressed: () => context.go('/matches'),
         ),
-        KButton(
-          'Tim Saya',
-          secondary: true,
-          onPressed: () => context.push('/team'),
-        ),
-        KButton(
-          'Akun dan login',
-          secondary: true,
-          onPressed: () => context.push('/login'),
-        ),
-        const LocalNotice(),
       ],
     );
   }

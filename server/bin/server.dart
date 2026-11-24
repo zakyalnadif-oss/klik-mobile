@@ -201,7 +201,7 @@ Future<Response> _handleRegister(Request request) async {
       Sql.named(
         'INSERT INTO users (email, password, display_name, city, sport) '
         'VALUES (@email, @password, @displayName, @city, @sport) '
-        'RETURNING id, email, display_name, city, sport, level, theme',
+        'RETURNING id, email, display_name, city, sport, level, theme, avatar_url',
       ),
       parameters: {
         'email': email,
@@ -247,6 +247,7 @@ Future<Response> _handleRegister(Request request) async {
         'sport': row['sport'],
         'level': row['level'],
         'theme': row['theme'],
+        'avatar_url': row['avatar_url'],
         'playerId': 'user-$userId',
       },
     }, 201);
@@ -268,7 +269,7 @@ Future<Response> _handleLogin(Request request) async {
 
     final result = await _db.execute(
       Sql.named(
-        'SELECT id, email, display_name, city, sport, level, theme FROM users '
+        'SELECT id, email, display_name, city, sport, level, theme, avatar_url FROM users '
         'WHERE email = @email AND password = @password LIMIT 1',
       ),
       parameters: {'email': email, 'password': password},
@@ -293,6 +294,7 @@ Future<Response> _handleLogin(Request request) async {
         'sport': row['sport'],
         'level': row['level'],
         'theme': row['theme'],
+        'avatar_url': row['avatar_url'],
         'playerId': pid,
       },
     });
@@ -307,7 +309,7 @@ Future<Response> _handleMe(Request request) async {
 
   final result = await _db.execute(
     Sql.named(
-      'SELECT id, email, display_name, city, sport, level, theme FROM users WHERE id = @id LIMIT 1',
+      'SELECT id, email, display_name, city, sport, level, theme, avatar_url FROM users WHERE id = @id LIMIT 1',
     ),
     parameters: {'id': userId},
   );
@@ -324,6 +326,7 @@ Future<Response> _handleMe(Request request) async {
       'sport': row['sport'],
       'level': row['level'],
       'theme': row['theme'],
+      'avatar_url': row['avatar_url'],
       'playerId': pid,
     },
   });
@@ -1235,7 +1238,7 @@ Future<Response> _handleFullSync(Request request) async {
   Map<String, dynamic>? userProfile;
   if (userId != null) {
     final uRows = await _db.execute(
-      Sql.named('SELECT display_name, city, sport, level, theme FROM users WHERE id = @uid LIMIT 1'),
+      Sql.named('SELECT display_name, city, sport, level, theme, avatar_url FROM users WHERE id = @uid LIMIT 1'),
       parameters: {'uid': userId},
     );
     if (uRows.isNotEmpty) {
